@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOVA Cloud Agent</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #0d0f12; --panel: #14171c; --panel-2: #1b1f26; --border: #262b33;
+    --text: #e6e8eb; --muted: #8b93a0; --accent: #7c9cff; --accent-2: #5b7cf0;
+    --ok: #3fb97f; --warn: #e3b341; --err: #f06a6a; --add: #12301f; --del: #3a1618;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); padding: 6px 12px; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent-2); border-color: var(--accent-2); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  textarea, input { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; width: 100%; }
+  textarea:focus, input:focus { outline: none; border-color: var(--accent); }
+  .app { display: grid; grid-template-columns: 300px 1fr; height: 100%; }
+  aside { border-right: 1px solid var(--border); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+  .brand { padding: 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .logo { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), #b07cff); }
+  .brand b { font-size: 15px; } .brand small { color: var(--muted); display: block; font-size: 12px; }
+  .task-list { overflow-y: auto; flex: 1; padding: 8px; }
+  .task-item { padding: 10px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 4px; border: 1px solid transparent; }
+  .task-item:hover { background: var(--panel-2); }
+  .task-item.active { background: var(--panel-2); border-color: var(--border); }
+  .task-item .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .task-item .m { color: var(--muted); font-size: 12px; display: flex; gap: 8px; align-items: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--muted); }
+  .dot.running, .dot.queued { background: var(--warn); animation: pulse 1.2s infinite; }
+  .dot.completed { background: var(--ok); } .dot.failed { background: var(--err); }
+  @keyframes pulse { 50% { opacity: .35; } }
+  main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .empty { margin: auto; width: min(720px, 100%); padding: 16px; }
+  .empty h1 { font-size: 26px; margin: 0 0 6px; } .empty p { color: var(--muted); margin: 0 0 18px; }
+  .composer { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
+  .composer textarea { border: 0; background: transparent; resize: vertical; min-height: 90px; padding: 4px; }
+  .composer .row { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .composer .row input { flex: 1; min-width: 180px; }
+  .composer .row input.branch { flex: 0 0 140px; min-width: 120px; }
+  header.task-head { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  header.task-head .title { flex: 1; min-width: 0; }
+  header.task-head .title div { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  header.task-head .title small { color: var(--muted); }
+  .tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--border); }
+  .tab { padding: 10px 12px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .pane { flex: 1; overflow-y: auto; padding: 20px; min-height: 0; }
+  .timeline { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+  .ev-user { align-self: flex-end; background: var(--accent-2); color: #fff; padding: 10px 14px; border-radius: 14px 14px 4px 14px; max-width: 80%; white-space: pre-wrap; }
+  .ev-msg { white-space: pre-wrap; background: var(--panel); border: 1px solid var(--border); padding: 12px 14px; border-radius: 12px; }
+  .ev-think { color: var(--muted); font-style: italic; white-space: pre-wrap; border-left: 2px solid var(--border); padding-left: 10px; font-size: 13px; }
+  .ev-log { color: var(--muted); font-size: 12px; }
+  .ev-status { font-size: 12px; color: var(--muted); text-align: center; }
+  .ev-status.failed { color: var(--err); } .ev-status.completed { color: var(--ok); }
+  details.tool { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
+  details.tool summary { padding: 8px 12px; cursor: pointer; font-family: var(--mono); font-size: 12.5px; list-style: none; display: flex; gap: 8px; }
+  details.tool summary::-webkit-details-marker { display: none; }
+  details.tool summary .k { color: var(--accent); flex: none; }
+  details.tool summary .c { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  details.tool.err summary .k { color: var(--err); }
+  pre { margin: 0; font-family: var(--mono); font-size: 12.5px; white-space: pre-wrap; word-break: break-word; }
+  details.tool pre { padding: 10px 12px; border-top: 1px solid var(--border); max-height: 420px; overflow: auto; color: #c9ced6; }
+  .live { opacity: .85; }
+  .followup { border-top: 1px solid var(--border); padding: 12px 20px; }
+  .followup form { max-width: 900px; margin: 0 auto; display: flex; gap: 8px; }
+  .followup textarea { min-height: 44px; height: 44px; resize: vertical; }
+  .diff { max-width: 1100px; margin: 0 auto; }
+  .diff .file { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+  .diff .fname { background: var(--panel-2); padding: 8px 12px; font-family: var(--mono); font-size: 12.5px; }
+  .diff pre { padding: 0; overflow-x: auto; white-space: pre; }
+  .diff .ln { display: block; padding: 0 12px; }
+  .diff .a { background: var(--add); } .diff .d { background: var(--del); } .diff .h { color: var(--accent); background: #161b27; }
+  .actions { display: flex; gap: 8px; margin-bottom: 14px; max-width: 1100px; margin-left: auto; margin-right: auto; flex-wrap: wrap; }
+  .muted { color: var(--muted); }
+  .menu-btn { display: none; }
+  @media (max-width: 760px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: fixed; inset: 0 30% 0 0; z-index: 5; transform: translateX(-100%); transition: transform .2s; }
+    aside.open { transform: none; }
+    .menu-btn { display: inline-block; }
+    .pane, .followup, header.task-head { padding-left: 16px; padding-right: 16px; }
+    .tabs { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside id="sidebar">
+    <div class="brand"><div class="logo"></div><div><b>NOVA Agent</b><small id="cfg">cloud coding agent</small></div></div>
+    <div style="padding:8px"><button class="primary" style="width:100%" id="newBtn">+ New task</button></div>
+    <div class="task-list" id="taskList"></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<template id="newTpl">
+  <div class="empty">
+    <button class="menu-btn" data-menu style="margin-bottom:12px">☰ Tasks</button>
+    <h1>What should NOVA work on?</h1>
+    <p>Describe a task. NOVA clones the repo into an isolated sandbox, writes and runs code, and hands you back a diff.</p>
+    <form class="composer" id="createForm">
+      <textarea name="prompt" placeholder="e.g. Add input validation to the signup endpoint and write tests for it" required></textarea>
+      <div class="row">
+        <input name="repo_url" placeholder="https://github.com/owner/repo.git (optional)">
+        <input name="branch" class="branch" placeholder="branch">
+        <button class="primary" type="submit">Run task ↵</button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<script>
+const $ = (sel, el = document) => el.querySelector(sel);
+const h = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+
+let token = store.get("nova-token") || "";
+let current = null, source = null, tab = "log";
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { ...opts, headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}) } });
+  if (res.status === 401) {
+    token = prompt("This NOVA server needs an access token:") || "";
+    store.set("nova-token", token);
+    return api(path, opts);
+  }
+  if (!res.ok) { let msg = res.statusText; try { msg = (await res.json()).detail || msg; } catch {} throw new Error(msg); }
+  return res.status === 204 ? null : res.json();
+}
+
+function ago(ts) {
+  const s = Math.floor(Date.now() / 1000 - ts);
+  if (s < 60) return "just now"; if (s < 3600) return Math.floor(s / 60) + "m ago";
+  if (s < 86400) return Math.floor(s / 3600) + "h ago"; return Math.floor(s / 86400) + "d ago";
+}
+
+async function refreshList() {
+  const tasks = await api("/api/tasks");
+  const list = $("#taskList"); list.replaceChildren();
+  if (!tasks.length) list.append(h("div", "muted", "No tasks yet."));
+  for (const t of tasks) {
+    const item = h("div", "task-item" + (current && current.id === t.id ? " active" : ""));
+    item.append(h("div", "t", t.title));
+    const meta = h("div", "m"); meta.append(h("span", "dot " + t.status), h("span", null, t.status), h("span", null, ago(t.created_at)));
+    if (t.repo_url) meta.append(h("span", null, t.repo_url.replace(/^https:\/\/(www\.)?github\.com\//, "").replace(/\.git$/, "")));
+    item.append(meta);
+    item.onclick = () => { location.hash = t.id; };
+    list.append(item);
+  }
+}
+
+function showNew() {
+  current = null; if (source) source.close();
+  const main = $("#main"); main.replaceChildren($("#newTpl").content.cloneNode(true));
+  const form = $("#createForm");
+  const submit = async (e) => {
+    e && e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+    try { const t = await api("/api/tasks", { method: "POST", body: JSON.stringify(data) }); location.hash = t.id; }
+    catch (err) { alert(err.message); }
+  };
+  form.onsubmit = submit;
+  form.prompt.onkeydown = (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit(e); };
+  form.prompt.focus();
+  refreshList();
+}
+
+async function showTask(id) {
+  if (source) source.close();
+  let task;
+  try { task = await api("/api/tasks/" + id); } catch { location.hash = ""; return; }
+  current = task; tab = "log";
+  const main = $("#main"); main.replaceChildren();
+
+  const head = h("header", "task-head");
+  const menu = h("button", "menu-btn", "☰"); menu.dataset.menu = "";
+  const title = h("div", "title"); title.append(h("div", null, task.title));
+  const sub = h("small"); title.append(sub);
+  const cancelBtn = h("button", null, "Stop"); cancelBtn.onclick = () => api(`/api/tasks/${id}/cancel`, { method: "POST" });
+  const delBtn = h("button", null, "Delete");
+  delBtn.onclick = async () => { if (confirm("Delete this task and its workspace?")) { await api("/api/tasks/" + id, { method: "DELETE" }); location.hash = ""; } };
+  head.append(menu, title, cancelBtn, delBtn);
+
+  const tabs = h("div", "tabs");
+  const logTab = h("button", "tab active", "Activity"), diffTab = h("button", "tab", "Diff");
+  tabs.append(logTab, diffTab);
+
+  const pane = h("div", "pane");
+  const timeline = h("div", "timeline"); pane.append(timeline);
+  const diffBox = h("div", "diff");
+
+  const foot = h("div", "followup");
+  const form = h("form"); const input = h("textarea"); input.placeholder = "Ask for changes or a follow-up…";
+  const send = h("button", "primary", "Send"); send.type = "submit";
+  form.append(input, send); foot.append(form);
+  form.onsubmit = async (e) => {
+    e.preventDefault(); if (!input.value.trim()) return;
+    try { await api(`/api/tasks/${id}/messages`, { method: "POST", body: JSON.stringify({ message: input.value }) }); input.value = ""; }
+    catch (err) { alert(err.message); }
+  };
+  input.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
+
+  main.append(head, tabs, pane, foot);
+
+  const setStatus = (status) => {
+    current.status = status;
+    sub.textContent = `${status}${task.repo_url ? " · " + task.repo_url : ""}${task.branch ? " @ " + task.branch : ""}`;
+    const busy = status === "running" || status === "queued";
+    cancelBtn.disabled = !busy; send.disabled = busy;
+  };
+  setStatus(task.status);
+
+  logTab.onclick = () => { tab = "log"; logTab.classList.add("active"); diffTab.classList.remove("active"); pane.replaceChildren(timeline); };
+  diffTab.onclick = async () => { tab = "diff"; diffTab.classList.add("active"); logTab.classList.remove("active"); pane.replaceChildren(diffBox); await loadDiff(id, diffBox); };
+
+  // Replay the full log over SSE; it keeps streaming new events live.
+  let live = null, liveKind = null;
+  const toolEls = {};
+  const stick = () => { if (tab === "log" && pane.scrollHeight - pane.scrollTop - pane.clientHeight < 200) pane.scrollTop = pane.scrollHeight; };
+  const endLive = () => { if (live) { live.remove(); live = null; liveKind = null; } };
+
+  const q = token ? `&token=${encodeURIComponent(token)}` : "";
+  source = new EventSource(`/api/tasks/${id}/events?after=0${q}`);
+  source.onmessage = (msg) => {
+    const ev = JSON.parse(msg.data), d = ev.data;
+    switch (ev.type) {
+      case "text_delta": case "thinking_delta": {
+        const kind = ev.type === "text_delta" ? "ev-msg" : "ev-think";
+        if (!live || liveKind !== kind) { endLive(); live = h("div", kind + " live"); liveKind = kind; timeline.append(live); }
+        live.textContent += d.text; break;
+      }
+      case "user": endLive(); timeline.append(h("div", "ev-user", d.text)); break;
+      case "thinking": endLive(); timeline.append(h("div", "ev-think", d.text)); break;
+      case "message": endLive(); timeline.append(h("div", "ev-msg", d.text)); break;
+      case "log": timeline.append(h("div", "ev-log", d.text)); break;
+      case "tool_call": {
+        endLive();
+        const det = h("details", "tool"); const sum = h("summary");
+        let label = d.name === "bash" ? "$" : "edit", body = "";
+        if (d.name === "bash") body = d.input.restart ? "(restart shell)" : d.input.command;
+        else body = `${d.input.command} ${d.input.path || ""}`;
+        sum.append(h("span", "k", label), h("span", "c", body)); det.append(sum);
+        if (d.name !== "bash" && (d.input.old_str != null || d.input.file_text != null || d.input.insert_text != null)) {
+          det.append(h("pre", null, d.input.file_text ?? d.input.insert_text ?? `- ${d.input.old_str}\n+ ${d.input.new_str ?? ""}`));
+        }
+        toolEls[d.id] = det; timeline.append(det); break;
+      }
+      case "tool_result": {
+        const det = toolEls[d.id]; if (!det) break;
+        if (d.is_error) det.classList.add("err");
+        det.append(h("pre", null, d.output)); break;
+      }
+      case "status":
+        endLive(); setStatus(d.status);
+        if (d.status !== "running") {
+          const s = h("div", "ev-status " + d.status, d.status === "failed" ? "Failed: " + (d.error || "") : d.status === "completed" ? "Task completed" : d.status);
+          timeline.append(s);
+        }
+        refreshList(); break;
+      case "commit": timeline.append(h("div", "ev-log", `Committed ${d.commit.slice(0, 8)} on ${d.branch}${d.pushed ? " and pushed" : ""}`)); break;
+    }
+    stick();
+  };
+  refreshList();
+}
+
+async function loadDiff(id, box) {
+  box.replaceChildren(h("div", "muted", "Loading diff…"));
+  const { diff } = await api(`/api/tasks/${id}/diff`);
+  box.replaceChildren();
+  const actions = h("div", "actions");
+  const commitBtn = h("button", null, "Commit to branch"), pushBtn = h("button", "primary", "Commit & push");
+  const doCommit = async (push) => {
+    const message = prompt("Commit message:", current.title); if (message === null) return;
+    try { const r = await api(`/api/tasks/${id}/commit`, { method: "POST", body: JSON.stringify({ message, push }) }); alert(`Committed ${r.commit.slice(0, 8)} on ${r.branch}${r.pushed ? " and pushed" : ""}`); }
+    catch (err) { alert(err.message); }
+  };
+  commitBtn.onclick = () => doCommit(false); pushBtn.onclick = () => doCommit(true);
+  pushBtn.disabled = !current.repo_url;
+  actions.append(commitBtn, pushBtn); box.append(actions);
+  if (!diff.trim()) { box.append(h("div", "muted", "No changes yet.")); return; }
+  for (const chunk of diff.split(/^(?=diff --git )/m)) {
+    if (!chunk.trim()) continue;
+    const lines = chunk.split("\n");
+    const m = /^diff --git a\/(.*) b\/(.*)$/.exec(lines[0]);
+    const file = h("div", "file"); file.append(h("div", "fname", m ? m[2] : lines[0]));
+    const pre = h("pre");
+    let started = false;
+    for (const line of lines.slice(1)) {
+      if (line.startsWith("@@")) started = true;
+      if (!started) continue;
+      const cls = line.startsWith("@@") ? "h" : line.startsWith("+") ? "a" : line.startsWith("-") ? "d" : "";
+      pre.append(h("span", "ln " + cls, line || " "));
+    }
+    if (!started) pre.append(h("span", "ln muted", "(binary or mode change)"));
+    file.append(pre); box.append(file);
+  }
+}
+
+function route() { $("#sidebar").classList.remove("open"); const id = location.hash.slice(1); id ? showTask(id) : showNew(); }
+window.addEventListener("hashchange", route);
+document.addEventListener("click", (e) => { if (e.target.closest("[data-menu]")) $("#sidebar").classList.toggle("open"); });
+$("#newBtn").onclick = () => { location.hash = ""; route(); };
+api("/api/config").then(c => { $("#cfg").textContent = `${c.model} · ${c.sandbox} sandbox`; }).catch(() => {});
+route();
+setInterval(refreshList, 10000);
+</script>
+</body>
+</html>
