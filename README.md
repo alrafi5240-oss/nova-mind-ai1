@@ -47,6 +47,25 @@ development without Docker you can run commands directly on your machine —
 NOVA_SANDBOX=local python -m nova_agent
 ```
 
+### Deploy to a VPS (one command)
+
+On a fresh Ubuntu/Debian server with ports 80/443 open:
+
+```bash
+git clone https://github.com/alrafi5240-oss/nova-mind-ai1.git nova-agent
+cd nova-agent
+sudo bash deploy/install.sh
+```
+
+The script installs Docker if needed, asks for your Anthropic API key and an
+optional domain, generates an access token, and starts NOVA behind Caddy
+(automatic HTTPS when you give a domain). It prints the URL and token at the
+end. Open the URL on your phone and paste the token when asked. Settings live
+in `deploy/.env`; update with `git pull && sudo bash deploy/install.sh`.
+
+> **বাংলায়:** VPS-এ উপরের ৩টা কমান্ড চালান। API key আর (থাকলে) domain চাইবে,
+> শেষে একটা URL আর token দেখাবে — মোবাইলে সেই URL খুলে token দিন।
+
 ### Running the server itself in Docker
 
 Sandboxes are sibling containers created through the host's Docker daemon, so

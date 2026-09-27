@@ -1,0 +1,9 @@
+# NOVA_SITE is a domain (e.g. nova.example.com, gets HTTPS automatically)
+# or ":80" to serve plain HTTP on the server's IP address.
+{$NOVA_SITE::80} {
+	encode gzip
+	reverse_proxy nova:8787 {
+		# Stream Server-Sent Events immediately.
+		flush_interval -1
+	}
+}

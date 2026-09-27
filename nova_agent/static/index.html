@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#262624" media="(prefers-color-scheme: dark)">
 <title>NOVA Cloud Agent</title>
 <link rel="icon" href="data:,">
 <style>
   :root {
-    --bg: #faf9f5; --sidebar: #f3f1e8; --panel: #ffffff; --soft: #f0eee6; --border: #e5e2d6;
+    --bg: #faf9f5; --sidebar: #f3f1e8; --panel: #ffffff; --soft: #f0eee6; --hover: #eae7dc; --border: #e5e2d6;
     --text: #1f1e1d; --muted: #75736b; --accent: #d97757; --accent-strong: #c2603f; --accent-soft: #f6e3da;
     --ok: #4d8a5e; --err: #bf4d43; --add-bg: #e6f2e4; --add-fg: #2f5d36; --del-bg: #f8e3e0; --del-fg: #8a3128; --hunk: #efece2;
     --code-bg: #f5f3ec; --shadow: 0 1px 2px rgba(31, 30, 29, .04), 0 4px 18px rgba(31, 30, 29, .06);
@@ -17,7 +19,7 @@
     color-scheme: light;
   }
   :root[data-theme="dark"] {
-    --bg: #262624; --sidebar: #1f1e1d; --panel: #30302e; --soft: #393937; --border: #41403c;
+    --bg: #262624; --sidebar: #1f1e1d; --panel: #30302e; --soft: #393937; --hover: #3a3936; --border: #41403c;
     --text: #f3f1ea; --muted: #a39f95; --accent: #d97757; --accent-strong: #e08868; --accent-soft: #4a352c;
     --ok: #7fbf8e; --err: #e58277; --add-bg: #253529; --add-fg: #a9d8b2; --del-bg: #3d2724; --del-fg: #f0aba2; --hunk: #34332f;
     --code-bg: #2b2a28; --shadow: 0 1px 2px rgba(0, 0, 0, .2), 0 6px 20px rgba(0, 0, 0, .25);
@@ -25,7 +27,7 @@
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #262624; --sidebar: #1f1e1d; --panel: #30302e; --soft: #393937; --border: #41403c;
+      --bg: #262624; --sidebar: #1f1e1d; --panel: #30302e; --soft: #393937; --hover: #3a3936; --border: #41403c;
       --text: #f3f1ea; --muted: #a39f95; --accent: #d97757; --accent-strong: #e08868; --accent-soft: #4a352c;
       --ok: #7fbf8e; --err: #e58277; --add-bg: #253529; --add-fg: #a9d8b2; --del-bg: #3d2724; --del-fg: #f0aba2; --hunk: #34332f;
       --code-bg: #2b2a28; --shadow: 0 1px 2px rgba(0, 0, 0, .2), 0 6px 20px rgba(0, 0, 0, .25);
@@ -34,73 +36,110 @@
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
-  body { background: var(--bg); color: var(--text); font: 15px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
-  button { font: inherit; cursor: pointer; color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; transition: background .15s, border-color .15s; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow: hidden; }
+  button { font: inherit; cursor: pointer; color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; transition: background .15s, border-color .15s, color .15s; }
   button:hover { background: var(--soft); }
   button:disabled { opacity: .45; cursor: default; background: transparent; }
-  button.ghost { border-color: transparent; }
   button.accent { background: var(--accent); border-color: var(--accent); color: #fff; }
   button.accent:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
   button.accent:disabled { background: var(--accent); }
+  button.icon-btn { width: 34px; height: 34px; padding: 0; display: inline-grid; place-items: center; border-color: transparent; color: var(--muted); flex: none; }
+  button.icon-btn:hover { color: var(--text); background: var(--hover); }
+  button.icon-btn svg { width: 18px; height: 18px; }
   textarea, input { font: inherit; color: var(--text); background: transparent; border: 0; outline: none; width: 100%; }
   ::placeholder { color: var(--muted); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   textarea:focus-visible, input:focus-visible { outline: none; }
+  svg.i { width: 18px; height: 18px; flex: none; }
 
-  .app { display: grid; grid-template-columns: 272px 1fr; height: 100%; }
-  aside { background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
-  .brand { display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px; }
-  .brand .mark { width: 26px; height: 26px; color: var(--accent); flex: none; }
+  .app { display: flex; height: 100%; height: 100dvh; }
+
+  /* ---------- Left: sidebar ---------- */
+  aside { width: 280px; flex: none; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; transition: width .2s ease; overflow: hidden; }
+  .side-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 10px 8px 16px; min-height: 58px; }
+  .brand { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+  .brand .mark { width: 24px; height: 24px; color: var(--accent); flex: none; }
   .brand b { font-family: var(--serif); font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
-  .new-btn { margin: 6px 12px 10px; display: flex; align-items: center; gap: 8px; border: 0; padding: 8px 10px; border-radius: 10px; font-weight: 500; }
-  .new-btn .plus { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 16px; line-height: 1; }
-  .section-label { font-size: 12px; color: var(--muted); padding: 6px 20px; }
+  .nav { padding: 2px 8px 8px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; border: 0; padding: 7px 10px; border-radius: 10px; width: 100%; text-align: left; white-space: nowrap; color: var(--text); }
+  .nav-item:hover { background: var(--hover); }
+  .nav-item .plus { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; flex: none; margin-left: -2px; }
+  .nav-item .plus svg { width: 14px; height: 14px; }
+  .nav-item.new { font-weight: 500; color: var(--accent-strong); }
+  .search { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; color: var(--muted); }
+  .search:focus-within { background: var(--panel); box-shadow: var(--shadow); color: var(--text); }
+  .search input { font-size: 14px; padding: 0; }
   .task-list { overflow-y: auto; flex: 1; padding: 0 8px 8px; }
-  .task-item { padding: 8px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 2px; }
-  .task-item:hover { background: var(--soft); }
+  .group-label { font-size: 12px; color: var(--muted); padding: 12px 10px 4px; white-space: nowrap; }
+  .task-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 10px; cursor: pointer; margin-bottom: 1px; color: inherit; text-decoration: none; }
+  .task-item:hover { background: var(--hover); }
   .task-item.active { background: var(--panel); box-shadow: var(--shadow); }
-  .task-item .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
-  .task-item .m { color: var(--muted); font-size: 12px; display: flex; gap: 6px; align-items: center; white-space: nowrap; overflow: hidden; }
+  .task-item .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; flex: 1; }
   .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: var(--muted); flex: none; }
   .dot.running, .dot.queued { background: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
   .dot.completed { background: var(--ok); } .dot.failed { background: var(--err); }
   @keyframes pulse { 50% { opacity: .3; } }
-  .side-foot { border-top: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .side-foot small { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .empty-list { color: var(--muted); font-size: 13px; padding: 10px; }
+  .profile { border-top: 1px solid var(--border); padding: 10px 10px 12px; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--text); color: var(--bg); display: grid; place-items: center; font-weight: 600; font-size: 14px; flex: none; }
+  .profile .who { flex: 1; min-width: 0; line-height: 1.3; }
+  .profile .who b { font-weight: 500; font-size: 14px; display: block; }
+  .profile .who small { color: var(--muted); font-size: 12px; display: block; overflow: hidden; text-overflow: ellipsis; }
 
-  main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-  .column { width: min(760px, 100%); margin: 0 auto; }
+  /* Collapsed rail (desktop only) */
+  @media (min-width: 761px) {
+    .app.collapsed aside { width: 60px; }
+    .app.collapsed .side-top { flex-direction: column; gap: 8px; padding: 12px 0 8px; }
+    .app.collapsed .brand b, .app.collapsed .nav-item .lbl, .app.collapsed .search input,
+    .app.collapsed .task-list, .app.collapsed .profile .who, .app.collapsed .profile .theme { display: none; }
+    .app.collapsed .nav { align-items: center; }
+    .app.collapsed .nav-item, .app.collapsed .search { width: 40px; justify-content: center; padding: 8px 0; cursor: pointer; }
+    .app.collapsed .profile { justify-content: center; padding: 12px 0; margin-top: auto; }
+  }
 
-  /* Composer (new task + follow-up) */
-  .composer { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); padding: 14px 14px 10px 18px; transition: border-color .15s; }
+  /* ---------- Right: main area ---------- */
+  main { flex: 1; display: flex; min-width: 0; min-height: 0; }
+  .chat { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .column { width: min(740px, 100%); margin: 0 auto; }
+  .topbar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; min-height: 58px; }
+  .topbar .title { flex: 1; min-width: 0; padding-left: 4px; }
+  .topbar .title div { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar .title small { color: var(--muted); font-size: 12px; display: flex; gap: 6px; align-items: center; white-space: nowrap; overflow: hidden; }
+  .changes-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 12px; flex: none; }
+  .changes-btn .count { font-size: 12px; }
+  .changes-btn .count b { color: var(--add-fg); font-weight: 600; } .changes-btn .count i { color: var(--del-fg); font-style: normal; font-weight: 600; }
+  .changes-btn.on { background: var(--panel); box-shadow: var(--shadow); }
+  .mobile-only { display: none !important; }
+
+  .composer { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); padding: 14px 12px 10px 16px; transition: border-color .15s; }
   .composer:focus-within { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
-  .composer textarea { resize: none; min-height: 28px; max-height: 260px; display: block; }
-  .composer .bar { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  .chip { display: flex; align-items: center; gap: 6px; background: var(--soft); border-radius: 999px; padding: 3px 12px; min-width: 0; flex: 1; max-width: 420px; }
+  .composer textarea { resize: none; min-height: 26px; max-height: 240px; display: block; padding: 0 4px 0 2px; }
+  .composer .bar { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .composer .extras { display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .composer.show-extras .extras { display: flex; }
+  .composer .plus-btn { width: 32px; height: 32px; border: 1px solid var(--border); color: var(--muted); }
+  .composer.show-extras .plus-btn { color: var(--accent-strong); border-color: var(--accent); background: var(--accent-soft); }
+  .chip { display: flex; align-items: center; gap: 6px; background: var(--soft); border-radius: 999px; padding: 4px 12px; min-width: 0; flex: 1 1 260px; }
   .chip svg { width: 14px; height: 14px; color: var(--muted); flex: none; }
-  .chip input { font-size: 13px; padding: 3px 0; min-width: 0; }
-  .chip.branch { flex: 0 1 130px; }
-  .send { margin-left: auto; width: 34px; height: 34px; padding: 0; border-radius: 10px; display: grid; place-items: center; flex: none; }
+  .chip input { font-size: 13px; padding: 2px 0; min-width: 0; }
+  .chip.branch { flex: 0 1 170px; }
+  .repo-tag { font-size: 12.5px; color: var(--muted); background: var(--soft); border-radius: 999px; padding: 3px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+  .model-tag { margin-left: auto; font-size: 13px; color: var(--muted); padding: 0 6px; white-space: nowrap; }
+  .send { width: 32px; height: 32px; padding: 0; border-radius: 10px; display: grid; place-items: center; flex: none; }
+  .bar .send { margin-left: 0; }
   .send svg { width: 16px; height: 16px; }
 
-  .welcome { margin: auto; padding: 24px 16px 12vh; width: 100%; }
+  .welcome { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 24px 16px 12vh; overflow-y: auto; }
   .welcome h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 4vw, 40px); letter-spacing: -.02em; line-height: 1.2; text-align: center; margin: 0 0 28px; display: flex; align-items: center; justify-content: center; gap: 14px; }
   .welcome h1 svg { width: 34px; height: 34px; color: var(--accent); flex: none; }
-  .welcome .composer textarea { min-height: 72px; }
+  .welcome .composer textarea { min-height: 56px; }
   .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
-  .suggestions button { font-size: 13px; color: var(--muted); border-radius: 999px; padding: 5px 14px; background: var(--panel); }
+  .suggestions button { font-size: 13px; color: var(--muted); border-radius: 999px; padding: 5px 14px; background: var(--panel); display: inline-flex; gap: 6px; align-items: center; }
+  .suggestions button svg { width: 14px; height: 14px; }
   .suggestions button:hover { color: var(--text); }
 
-  header.task-head { padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
-  header.task-head .title { flex: 1; min-width: 0; }
-  header.task-head .title div { font-family: var(--serif); font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  header.task-head .title small { color: var(--muted); font-size: 12px; display: flex; gap: 6px; align-items: center; white-space: nowrap; overflow: hidden; }
-  .seg { display: flex; background: var(--soft); border-radius: 10px; padding: 3px; }
-  .seg button { border: 0; padding: 4px 12px; border-radius: 8px; font-size: 13px; color: var(--muted); }
-  .seg button.active { background: var(--panel); color: var(--text); box-shadow: var(--shadow); }
-
-  .pane { flex: 1; overflow-y: auto; padding: 28px 20px 12px; min-height: 0; }
-  .timeline { display: flex; flex-direction: column; gap: 14px; }
+  .pane { flex: 1; overflow-y: auto; padding: 12px 20px; min-height: 0; }
+  .timeline { display: flex; flex-direction: column; gap: 14px; padding-bottom: 8px; }
   .ev-user { align-self: flex-end; background: var(--soft); padding: 10px 16px; border-radius: 18px; max-width: 85%; white-space: pre-wrap; overflow-wrap: anywhere; }
   .ev-msg { overflow-wrap: anywhere; }
   .ev-msg p { margin: 0 0 .7em; } .ev-msg p:last-child { margin-bottom: 0; }
@@ -108,13 +147,14 @@
   .ev-msg code { font-family: var(--mono); font-size: .87em; background: var(--code-bg); border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; }
   .ev-msg pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; overflow-x: auto; margin: 0 0 .7em; }
   .ev-msg pre code { background: none; border: 0; padding: 0; }
-  .ev-msg h1, .ev-msg h2, .ev-msg h3 { font-family: var(--serif); font-weight: 600; font-size: 1.1em; margin: .6em 0 .3em; }
+  .ev-msg h3 { font-family: var(--serif); font-weight: 600; font-size: 1.1em; margin: .6em 0 .3em; }
   .ev-think { color: var(--muted); font-size: 13.5px; white-space: pre-wrap; border-left: 2px solid var(--border); padding: 2px 0 2px 12px; }
-  .ev-think::before { content: "Thinking"; display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); opacity: .8; margin-bottom: 2px; }
+  .ev-think::before { content: "Thinking"; display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: .8; margin-bottom: 2px; }
   .ev-log { color: var(--muted); font-size: 12.5px; display: flex; align-items: center; gap: 8px; }
-  .ev-log::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--border); }
-  .ev-status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .ev-log::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--border); flex: none; }
+  .ev-status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .ev-status.failed { color: var(--err); } .ev-status.completed { color: var(--ok); }
+  .ev-status button { font-size: 12.5px; padding: 3px 10px; color: var(--text); }
   .working { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
   .working svg { width: 22px; height: 22px; color: var(--accent); animation: spin 2.4s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -123,48 +163,61 @@
   details.tool summary { padding: 8px 12px; cursor: pointer; font-size: 13px; list-style: none; display: flex; gap: 10px; align-items: center; }
   details.tool summary::-webkit-details-marker { display: none; }
   details.tool summary:hover { background: var(--soft); }
-  details.tool summary .k { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 1px 7px; flex: none; }
+  details.tool summary .k { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-strong); background: var(--accent-soft); border-radius: 6px; padding: 1px 7px; flex: none; }
   details.tool summary .c { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
   details.tool summary .chev { color: var(--muted); transition: transform .15s; flex: none; }
   details.tool[open] summary .chev { transform: rotate(90deg); }
   details.tool.err summary .k { color: var(--err); background: var(--del-bg); }
   pre { margin: 0; font-family: var(--mono); font-size: 12.5px; white-space: pre-wrap; word-break: break-word; }
   details.tool pre { padding: 10px 14px; border-top: 1px solid var(--border); background: var(--code-bg); max-height: 420px; overflow: auto; }
-  .live { opacity: .8; }
+  .live { opacity: .8; white-space: pre-wrap; }
 
-  .followup { padding: 8px 20px 18px; }
+  .followup { padding: 6px 20px calc(14px + env(safe-area-inset-bottom)); }
   .followup .composer { padding: 10px 10px 10px 16px; border-radius: 18px; }
   .followup .composer .row { display: flex; align-items: flex-end; gap: 8px; }
   .followup .composer textarea { padding: 5px 0; }
   .hint { text-align: center; color: var(--muted); font-size: 12px; margin-top: 8px; }
 
-  .actions { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-  .actions .stat { color: var(--muted); font-size: 13px; margin-right: auto; }
-  .diff .file { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px; overflow: hidden; background: var(--panel); }
-  .diff .fname { padding: 8px 14px; font-family: var(--mono); font-size: 12.5px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; }
+  /* Right-hand Changes panel */
+  .panel { width: 0; flex: none; overflow: hidden; border-left: 1px solid transparent; background: var(--panel); display: flex; flex-direction: column; transition: width .22s ease; }
+  main.panel-open .panel { width: min(46vw, 720px); border-left-color: var(--border); }
+  .panel-inner { width: min(46vw, 720px); min-width: 0; display: flex; flex-direction: column; height: 100%; }
+  .panel-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px 10px 18px; min-height: 58px; border-bottom: 1px solid var(--border); }
+  .panel-head .ttl { flex: 1; min-width: 0; line-height: 1.3; }
+  .panel-head .ttl b { font-family: var(--serif); font-weight: 600; font-size: 16px; display: block; }
+  .panel-head .ttl small { color: var(--muted); font-size: 12px; }
+  .panel-actions { display: flex; gap: 8px; padding: 10px 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .panel-actions button { font-size: 13px; }
+  .panel-body { flex: 1; overflow: auto; padding: 14px 18px calc(14px + env(safe-area-inset-bottom)); }
+  .diff .file { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px; overflow: hidden; background: var(--bg); }
+  .diff .fname { padding: 8px 14px; font-family: var(--mono); font-size: 12.5px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; background: var(--panel); }
+  .diff .fname span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .diff .fname span:last-child { color: var(--muted); flex: none; }
   .diff pre { overflow-x: auto; white-space: pre; }
   .diff .ln { display: block; padding: 0 14px; min-height: 1.6em; }
   .diff .a { background: var(--add-bg); color: var(--add-fg); } .diff .d { background: var(--del-bg); color: var(--del-fg); }
   .diff .h { background: var(--hunk); color: var(--muted); }
   .muted { color: var(--muted); }
-  .menu-btn { display: none; }
   .scrim { display: none; }
-  .top-mobile { display: none; }
 
+  @media (max-width: 1000px) {
+    main.panel-open .panel { position: fixed; inset: 0; width: 100%; z-index: 6; border-left: 0; }
+    .panel-inner { width: 100%; }
+  }
   @media (max-width: 760px) {
-    .app { grid-template-columns: 1fr; }
-    aside { position: fixed; inset: 0 auto 0 0; width: min(300px, 85vw); z-index: 5; transform: translateX(-100%); transition: transform .2s; }
-    aside.open { transform: none; }
-    aside.open + .scrim { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, .3); z-index: 4; }
-    .menu-btn { display: inline-grid; place-items: center; }
-    .pane, .followup, header.task-head { padding-left: 16px; padding-right: 16px; }
-    .chip.branch { display: none; }
-    .top-mobile { display: flex; padding: 10px 16px; }
+    aside { position: fixed; inset: 0 auto 0 0; width: min(300px, 86vw); z-index: 8; transform: translateX(-100%); transition: transform .2s ease; box-shadow: var(--shadow); }
+    .app.side-open aside { transform: none; }
+    .app.side-open .scrim { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, .32); z-index: 7; }
+    .desk-only { display: none !important; }
+    .mobile-only { display: inline-grid !important; }
+    .pane, .followup { padding-left: 14px; padding-right: 14px; }
+    .topbar { padding: 8px; }
+    .changes-btn .lbl { display: none; }
     .welcome { padding-bottom: 8vh; }
     .welcome h1 { flex-direction: column; gap: 10px; }
-    header.task-head { flex-wrap: wrap; row-gap: 8px; }
-    .seg { order: 3; width: 100%; } .seg button { flex: 1; }
+    .chip, .chip.branch { flex: 1 1 100%; }
+    .model-tag { display: none; }
+    .bar .send { margin-left: auto; }
   }
 </style>
 </head>
@@ -172,40 +225,68 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="spark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5c.5 0 .9.35 1 .84l.9 5.1 4.36-2.8a1 1 0 0 1 1.38 1.38l-2.8 4.36 5.1.9a1 1 0 0 1 0 1.97l-5.1.9 2.8 4.36a1 1 0 0 1-1.38 1.38l-4.36-2.8-.9 5.1a1 1 0 0 1-1.97 0l-.9-5.1-4.36 2.8a1 1 0 0 1-1.38-1.38l2.8-4.36-5.1-.9a1 1 0 0 1 0-1.97l5.1-.9-2.8-4.36A1 1 0 0 1 5.74 4.64l4.36 2.8.9-5.1c.1-.49.5-.84 1-.84Z"/></symbol>
   <symbol id="arrow" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m-6 6 6-6 6 6"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></g></symbol>
+  <symbol id="i-sidebar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></g></symbol>
+  <symbol id="menu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h10"/></symbol>
   <symbol id="repo" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5"/></symbol>
   <symbol id="branch" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 3v12m0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm12-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0a9 9 0 0 1-9 9"/></symbol>
   <symbol id="stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></symbol>
+  <symbol id="diff" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/></g></symbol>
+  <symbol id="close" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/></symbol>
+  <symbol id="trash" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></symbol>
+  <symbol id="theme" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path fill="currentColor" stroke="none" d="M12 3.5a8.5 8.5 0 0 1 0 17z"/></g></symbol>
+  <symbol id="bug" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M3 13h4M17 13h4M4 7l3 2M20 7l-3 2M4 19l3-2M20 19l-3-2"/></g></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m5 12 4.5 4.5L19 7"/></symbol>
+  <symbol id="book" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zm0 16a2 2 0 0 1 2-2h13v2"/></symbol>
 </svg>
 
-<div class="app">
+<div class="app" id="app">
   <aside id="sidebar">
-    <div class="brand"><svg class="mark"><use href="#spark"/></svg><b>NOVA</b></div>
-    <button class="new-btn ghost" id="newBtn"><span class="plus">+</span>New task</button>
-    <div class="section-label">Recent tasks</div>
+    <div class="side-top">
+      <div class="brand"><svg class="mark"><use href="#spark"/></svg><b>NOVA</b></div>
+      <button class="icon-btn desk-only" id="collapseBtn" title="Toggle sidebar" aria-label="Toggle sidebar"><svg><use href="#i-sidebar"/></svg></button>
+      <button class="icon-btn mobile-only" data-close-side aria-label="Close sidebar"><svg><use href="#close"/></svg></button>
+    </div>
+    <div class="nav">
+      <button class="nav-item new" id="newBtn" title="New task"><span class="plus"><svg><use href="#plus"/></svg></span><span class="lbl">New task</span></button>
+      <label class="search" id="searchBox" title="Search tasks"><svg class="i"><use href="#search"/></svg><input id="taskSearch" placeholder="Search tasks"></label>
+    </div>
     <div class="task-list" id="taskList"></div>
-    <div class="side-foot"><small id="cfg">cloud coding agent</small><button class="ghost" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">◐</button></div>
+    <div class="profile">
+      <div class="avatar">N</div>
+      <div class="who"><b>NOVA workspace</b><small id="cfg">cloud coding agent</small></div>
+      <button class="icon-btn theme" id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme"><svg><use href="#theme"/></svg></button>
+    </div>
   </aside>
-  <div class="scrim" data-menu></div>
+  <div class="scrim" data-close-side></div>
   <main id="main"></main>
 </div>
 
 <template id="newTpl">
-  <div class="top-mobile"><button class="menu-btn ghost" data-menu aria-label="Open tasks">☰</button></div>
-  <div class="welcome">
-    <div class="column">
-      <h1><svg><use href="#spark"/></svg><span id="greeting">What should we build today?</span></h1>
-      <form class="composer" id="createForm">
-        <textarea name="prompt" rows="3" placeholder="Describe a task for NOVA — fix a bug, add a feature, write tests…" required></textarea>
-        <div class="bar">
-          <label class="chip"><svg><use href="#repo"/></svg><input name="repo_url" placeholder="https://github.com/owner/repo (optional)"></label>
-          <label class="chip branch"><svg><use href="#branch"/></svg><input name="branch" placeholder="branch"></label>
-          <button class="send accent" type="submit" aria-label="Start task"><svg><use href="#arrow"/></svg></button>
+  <div class="chat">
+    <div class="topbar"><button class="icon-btn mobile-only" data-open-side aria-label="Open sidebar"><svg><use href="#menu"/></svg></button></div>
+    <div class="welcome">
+      <div class="column">
+        <h1><svg><use href="#spark"/></svg><span id="greeting">What should we build today?</span></h1>
+        <form class="composer" id="createForm">
+          <textarea name="prompt" rows="2" placeholder="How can NOVA help you today?" required></textarea>
+          <div class="extras">
+            <label class="chip"><svg><use href="#repo"/></svg><input name="repo_url" placeholder="https://github.com/owner/repo"></label>
+            <label class="chip branch"><svg><use href="#branch"/></svg><input name="branch" placeholder="branch (optional)"></label>
+          </div>
+          <div class="bar">
+            <button type="button" class="icon-btn plus-btn" id="extrasBtn" title="Connect a repository" aria-label="Connect a repository"><svg><use href="#plus"/></svg></button>
+            <span class="repo-tag" id="repoTag" hidden></span>
+            <span class="model-tag" id="modelTag"></span>
+            <button class="send accent" type="submit" aria-label="Start task"><svg><use href="#arrow"/></svg></button>
+          </div>
+        </form>
+        <div class="suggestions">
+          <button type="button" data-s="Find and fix a failing test"><svg><use href="#bug"/></svg>Fix a failing test</button>
+          <button type="button" data-s="Add input validation and write tests for it"><svg><use href="#check"/></svg>Add validation + tests</button>
+          <button type="button" data-s="Read this codebase and write a clear README"><svg><use href="#book"/></svg>Write a README</button>
         </div>
-      </form>
-      <div class="suggestions">
-        <button type="button">Find and fix a failing test</button>
-        <button type="button">Add input validation with tests</button>
-        <button type="button">Explain this codebase in a README</button>
       </div>
     </div>
   </div>
@@ -214,8 +295,10 @@
 <script>
 const $ = (sel, el = document) => el.querySelector(sel);
 const h = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-const icon = (id) => { const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); const u = document.createElementNS("http://www.w3.org/2000/svg", "use"); u.setAttribute("href", "#" + id); s.append(u); return s; };
+const icon = (id, cls) => { const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); if (cls) s.setAttribute("class", cls); const u = document.createElementNS("http://www.w3.org/2000/svg", "use"); u.setAttribute("href", "#" + id); s.append(u); return s; };
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+const app = $("#app");
+const isMobile = () => matchMedia("(max-width: 760px)").matches;
 
 // Theme: follow the system unless the viewer picked one.
 const savedTheme = store.get("nova-theme");
@@ -228,25 +311,31 @@ $("#themeBtn").onclick = () => {
   store.set("nova-theme", document.documentElement.dataset.theme);
 };
 
+// Sidebar: collapsible rail on desktop, slide-in drawer on phones.
+if (store.get("nova-collapsed") === "1") app.classList.add("collapsed");
+const setCollapsed = (on) => { app.classList.toggle("collapsed", on); store.set("nova-collapsed", on ? "1" : "0"); };
+$("#collapseBtn").onclick = () => setCollapsed(!app.classList.contains("collapsed"));
+$("#searchBox").onclick = () => { if (app.classList.contains("collapsed") && !isMobile()) { setCollapsed(false); $("#taskSearch").focus(); } };
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-open-side]")) app.classList.add("side-open");
+  else if (e.target.closest("[data-close-side]")) app.classList.remove("side-open");
+});
+
 let token = store.get("nova-token") || "";
-let current = null, source = null, tab = "log";
+let current = null, source = null, config = { model: "", sandbox: "" }, allTasks = [];
 
 async function api(path, opts = {}) {
   const res = await fetch(path, { ...opts, headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}) } });
   if (res.status === 401) {
     token = prompt("This NOVA server needs an access token:") || "";
     store.set("nova-token", token);
+    if (!token) throw new Error("access token required");
     return api(path, opts);
   }
   if (!res.ok) { let msg = res.statusText; try { msg = (await res.json()).detail || msg; } catch {} throw new Error(msg); }
   return res.status === 204 ? null : res.json();
 }
 
-function ago(ts) {
-  const s = Math.floor(Date.now() / 1000 - ts);
-  if (s < 60) return "just now"; if (s < 3600) return Math.floor(s / 60) + "m ago";
-  if (s < 86400) return Math.floor(s / 3600) + "h ago"; return Math.floor(s / 86400) + "d ago";
-}
 const repoName = (url) => url.replace(/^https:\/\/(www\.)?github\.com\//, "").replace(/\.git$/, "");
 
 // Minimal, safe Markdown: escape everything first, then add a fixed set of tags.
@@ -279,29 +368,56 @@ function markdown(src) {
   return out.join("");
 }
 
-function autosize(ta) { const fit = () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 260) + "px"; }; ta.addEventListener("input", fit); fit(); }
+function autosize(ta) { const fit = () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 240) + "px"; }; ta.addEventListener("input", fit); fit(); }
 
+function diffStats(diff) {
+  const files = diff.split(/^(?=diff --git )/m).filter((c) => c.trim());
+  let adds = 0, dels = 0;
+  for (const l of diff.split("\n")) { if (l.startsWith("+") && !l.startsWith("+++")) adds++; else if (l.startsWith("-") && !l.startsWith("---")) dels++; }
+  return { files, adds, dels };
+}
+
+// ---------- Left: task list grouped by date ----------
 async function refreshList() {
-  const tasks = await api("/api/tasks");
+  try { allTasks = await api("/api/tasks"); } catch { return; }
+  renderList();
+}
+function renderList() {
+  const q = $("#taskSearch").value.trim().toLowerCase();
+  const tasks = allTasks.filter((t) => !q || t.title.toLowerCase().includes(q) || (t.repo_url || "").toLowerCase().includes(q));
   const list = $("#taskList"); list.replaceChildren();
-  if (!tasks.length) list.append(h("div", "section-label", "No tasks yet"));
+  if (!tasks.length) { list.append(h("div", "empty-list", q ? "No matching tasks" : "Your tasks will show up here")); return; }
+  const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+  const t0 = startOfToday.getTime() / 1000;
+  const groupOf = (ts) => ts >= t0 ? "Today" : ts >= t0 - 86400 ? "Yesterday" : ts >= t0 - 7 * 86400 ? "Previous 7 days" : "Older";
+  let last = null;
   for (const t of tasks) {
-    const item = h("div", "task-item" + (current && current.id === t.id ? " active" : ""));
-    item.append(h("div", "t", t.title));
-    const meta = h("div", "m"); meta.append(h("span", "dot " + t.status), h("span", null, ago(t.created_at)));
-    if (t.repo_url) meta.append(h("span", null, "· " + repoName(t.repo_url)));
-    item.append(meta);
-    item.onclick = () => { location.hash = t.id; };
+    const g = groupOf(t.created_at);
+    if (g !== last) { list.append(h("div", "group-label", g)); last = g; }
+    const item = h("a", "task-item" + (current && current.id === t.id ? " active" : ""));
+    item.href = "#" + t.id; item.title = t.title;
+    item.append(h("span", "dot " + t.status), h("span", "t", t.title));
     list.append(item);
   }
 }
+$("#taskSearch").addEventListener("input", renderList);
 
+// ---------- Right: new task screen ----------
 function showNew() {
   current = null; if (source) source.close();
-  const main = $("#main"); main.replaceChildren($("#newTpl").content.cloneNode(true));
+  const main = $("#main"); main.className = ""; main.replaceChildren($("#newTpl").content.cloneNode(true));
   const hour = new Date().getHours();
-  $("#greeting").textContent = hour < 12 ? "Good morning. What should we build?" : hour < 18 ? "Good afternoon. What should we build?" : "Good evening. What should we build?";
+  $("#greeting").textContent = (hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening") + ". What should we build?";
+  $("#modelTag").textContent = config.model;
   const form = $("#createForm");
+  const repoTag = $("#repoTag");
+  const syncTag = () => {
+    const url = form.repo_url.value.trim();
+    repoTag.hidden = !url || form.classList.contains("show-extras");
+    repoTag.textContent = url ? repoName(url) + (form.branch.value.trim() ? " @ " + form.branch.value.trim() : "") : "";
+  };
+  $("#extrasBtn").onclick = () => { form.classList.toggle("show-extras"); syncTag(); if (form.classList.contains("show-extras")) form.repo_url.focus(); };
+  form.repo_url.oninput = form.branch.oninput = syncTag;
   const submit = async (e) => {
     e && e.preventDefault();
     if (!form.prompt.value.trim()) return form.prompt.focus();
@@ -310,42 +426,99 @@ function showNew() {
     catch (err) { alert(err.message); }
   };
   form.onsubmit = submit;
-  form.prompt.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) submit(e); };
-  for (const b of main.querySelectorAll(".suggestions button")) b.onclick = () => { form.prompt.value = b.textContent; form.prompt.focus(); };
+  form.prompt.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !isMobile()) submit(e); };
+  for (const b of main.querySelectorAll(".suggestions button")) b.onclick = () => { form.prompt.value = b.dataset.s; form.prompt.dispatchEvent(new Event("input")); form.prompt.focus(); };
   autosize(form.prompt);
-  form.prompt.focus();
-  refreshList();
+  if (!isMobile()) form.prompt.focus();
+  renderList(); refreshList();
 }
 
+// ---------- Right: task conversation + Changes panel ----------
 async function showTask(id) {
   if (source) source.close();
   let task;
   try { task = await api("/api/tasks/" + id); } catch { location.hash = ""; return; }
-  current = task; tab = "log";
-  const main = $("#main"); main.replaceChildren();
+  current = task;
+  const main = $("#main"); main.className = ""; main.replaceChildren();
 
-  const head = h("header", "task-head");
-  const menu = h("button", "menu-btn ghost", "☰"); menu.dataset.menu = ""; menu.setAttribute("aria-label", "Open tasks");
+  // Conversation column
+  const chat = h("div", "chat");
+  const top = h("div", "topbar");
+  const openSide = h("button", "icon-btn mobile-only"); openSide.dataset.openSide = ""; openSide.append(icon("menu")); openSide.setAttribute("aria-label", "Open sidebar");
   const title = h("div", "title"); title.append(h("div", null, task.title));
   const sub = h("small"); title.append(sub);
-  const seg = h("div", "seg"); const logTab = h("button", "active", "Activity"), diffTab = h("button", null, "Changes"); seg.append(logTab, diffTab);
-  const delBtn = h("button", "ghost", "Delete");
-  delBtn.onclick = async () => { if (confirm("Delete this task and its workspace?")) { await api("/api/tasks/" + id, { method: "DELETE" }); location.hash = ""; } };
-  head.append(menu, title, seg, delBtn);
+  const changesBtn = h("button", "changes-btn"); const count = h("span", "count");
+  changesBtn.append(icon("diff", "i"), h("span", "lbl", "Changes"), count);
+  const delBtn = h("button", "icon-btn"); delBtn.append(icon("trash")); delBtn.title = "Delete task"; delBtn.setAttribute("aria-label", "Delete task");
+  delBtn.onclick = async () => { if (confirm("Delete this task and its workspace?")) { await api("/api/tasks/" + id, { method: "DELETE" }); location.hash = ""; refreshList(); } };
+  top.append(openSide, title, changesBtn, delBtn);
 
   const pane = h("div", "pane");
   const timeline = h("div", "timeline column"); pane.append(timeline);
-  const diffBox = h("div", "diff column");
-  const working = h("div", "working"); working.append(icon("spark"), h("span", null, "Working…"));
+  const working = h("div", "working"); working.append(icon("spark"), h("span", null, "NOVA is working…"));
 
   const foot = h("div", "followup");
   const form = h("form", "composer column"); const row = h("div", "row");
   const input = h("textarea"); input.rows = 1; input.placeholder = "Reply to NOVA…";
-  const send = h("button", "send accent"); send.type = "submit"; send.append(icon("arrow")); send.setAttribute("aria-label", "Send");
+  const send = h("button", "send accent"); send.type = "submit";
   row.append(input, send); form.append(row); foot.append(form, h("div", "hint", "NOVA works in an isolated sandbox. Review changes before you push."));
-  autosize(input);
+  chat.append(top, pane, foot);
 
-  let busy = false;
+  // Changes panel (right)
+  const panel = h("section", "panel"); const inner = h("div", "panel-inner");
+  const phead = h("div", "panel-head"); const pttl = h("div", "ttl"); const pstat = h("small", null, "");
+  pttl.append(h("b", null, "Changes"), pstat);
+  const closeBtn = h("button", "icon-btn"); closeBtn.append(icon("close")); closeBtn.setAttribute("aria-label", "Close changes");
+  phead.append(pttl, closeBtn);
+  const pactions = h("div", "panel-actions");
+  const commitBtn = h("button", null, "Commit to branch"), pushBtn = h("button", "accent", "Commit & push");
+  pactions.append(commitBtn, pushBtn);
+  const pbody = h("div", "panel-body diff");
+  inner.append(phead, pactions, pbody); panel.append(inner);
+  main.append(chat, panel);
+
+  const setPanel = (open) => { main.classList.toggle("panel-open", open); changesBtn.classList.toggle("on", open); if (open) loadDiff(); };
+  changesBtn.onclick = () => setPanel(!main.classList.contains("panel-open"));
+  closeBtn.onclick = () => setPanel(false);
+
+  let busy = false, diffTimer = null, lastFiles = 0;
+  async function loadDiff() {
+    let diff = "";
+    try { diff = (await api(`/api/tasks/${id}/diff`)).diff; } catch { return; }
+    if (current !== task) return;
+    const { files, adds, dels } = diffStats(diff);
+    lastFiles = files.length;
+    count.replaceChildren(); if (files.length) count.append(h("b", null, "+" + adds), " ", h("i", null, "−" + dels));
+    pstat.textContent = files.length ? `${files.length} file${files.length > 1 ? "s" : ""} changed · +${adds} −${dels}` : "No changes yet";
+    commitBtn.disabled = !files.length || busy; pushBtn.disabled = !files.length || busy || !task.repo_url;
+    if (!main.classList.contains("panel-open")) return;
+    pbody.replaceChildren();
+    if (!files.length) { pbody.append(h("div", "muted", "NOVA hasn't changed any files yet.")); return; }
+    for (const chunk of files) {
+      const lines = chunk.split("\n");
+      const m = /^diff --git a\/(.*) b\/(.*)$/.exec(lines[0]);
+      let fa = 0, fd = 0;
+      for (const l of lines) { if (l.startsWith("+") && !l.startsWith("+++")) fa++; else if (l.startsWith("-") && !l.startsWith("---")) fd++; }
+      const file = h("div", "file"); const name = h("div", "fname"); name.append(h("span", null, m ? m[2] : lines[0]), h("span", null, `+${fa} −${fd}`)); file.append(name);
+      const pre = h("pre"); let started = false;
+      for (const line of lines.slice(1)) {
+        if (line.startsWith("@@")) started = true;
+        if (!started) continue;
+        const cls = line.startsWith("@@") ? "h" : line.startsWith("+") ? "a" : line.startsWith("-") ? "d" : "";
+        pre.append(h("span", "ln " + cls, line || " "));
+      }
+      if (!started) pre.append(h("span", "ln muted", "(binary or mode change)"));
+      file.append(pre); pbody.append(file);
+    }
+  }
+  const scheduleDiff = () => { clearTimeout(diffTimer); diffTimer = setTimeout(loadDiff, 500); };
+  const doCommit = async (push) => {
+    const message = prompt("Commit message:", task.title); if (message === null) return;
+    try { const r = await api(`/api/tasks/${id}/commit`, { method: "POST", body: JSON.stringify({ message, push }) }); alert(`Committed ${r.commit.slice(0, 8)} on ${r.branch}${r.pushed ? " and pushed" : ""}`); loadDiff(); }
+    catch (err) { alert(err.message); }
+  };
+  commitBtn.onclick = () => doCommit(false); pushBtn.onclick = () => doCommit(true);
+
   form.onsubmit = async (e) => {
     e.preventDefault();
     if (busy) { await api(`/api/tasks/${id}/cancel`, { method: "POST" }); return; }
@@ -353,12 +526,11 @@ async function showTask(id) {
     try { await api(`/api/tasks/${id}/messages`, { method: "POST", body: JSON.stringify({ message: input.value }) }); input.value = ""; input.dispatchEvent(new Event("input")); }
     catch (err) { alert(err.message); }
   };
-  input.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (!busy) form.requestSubmit(); } };
-
-  main.append(head, pane, foot);
+  input.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !isMobile()) { e.preventDefault(); if (!busy) form.requestSubmit(); } };
+  autosize(input);
 
   const setStatus = (status) => {
-    current.status = status;
+    task.status = status;
     sub.replaceChildren(h("span", "dot " + status), h("span", null, status));
     if (task.repo_url) sub.append(h("span", null, "· " + repoName(task.repo_url) + (task.branch ? " @ " + task.branch : "")));
     busy = status === "running" || status === "queued";
@@ -367,17 +539,16 @@ async function showTask(id) {
     if (busy) timeline.append(working); else working.remove();
   };
   setStatus(task.status);
-
-  logTab.onclick = () => { tab = "log"; logTab.classList.add("active"); diffTab.classList.remove("active"); pane.replaceChildren(timeline); };
-  diffTab.onclick = async () => { tab = "diff"; diffTab.classList.add("active"); logTab.classList.remove("active"); pane.replaceChildren(diffBox); await loadDiff(id, diffBox); };
+  loadDiff();
 
   // Replay the full log over SSE; it keeps streaming new events live.
-  let live = null, liveKind = null;
+  let live = null, liveKind = null, replaying = true;
   const toolEls = {};
   const add = (el) => { timeline.insertBefore(el, working.parentNode === timeline ? working : null); };
-  const stick = () => { if (tab === "log" && pane.scrollHeight - pane.scrollTop - pane.clientHeight < 200) pane.scrollTop = pane.scrollHeight; };
+  const stick = () => { if (pane.scrollHeight - pane.scrollTop - pane.clientHeight < 240) pane.scrollTop = pane.scrollHeight; };
   const endLive = () => { if (live) { live.remove(); live = null; liveKind = null; } };
   const msgEl = (text) => { const el = h("div", "ev-msg"); el.innerHTML = markdown(text); return el; };
+  setTimeout(() => { replaying = false; pane.scrollTop = pane.scrollHeight; }, 400);
 
   const q = token ? `&token=${encodeURIComponent(token)}` : "";
   source = new EventSource(`/api/tasks/${id}/events?after=0${q}`);
@@ -386,7 +557,7 @@ async function showTask(id) {
     switch (ev.type) {
       case "text_delta": case "thinking_delta": {
         const kind = ev.type === "text_delta" ? "ev-msg" : "ev-think";
-        if (!live || liveKind !== kind) { endLive(); live = h("div", kind + " live"); live.style.whiteSpace = "pre-wrap"; liveKind = kind; add(live); }
+        if (!live || liveKind !== kind) { endLive(); live = h("div", kind + " live"); liveKind = kind; add(live); }
         live.textContent += d.text; break;
       }
       case "user": endLive(); add(h("div", "ev-user", d.text)); break;
@@ -403,68 +574,38 @@ async function showTask(id) {
         if (!isBash && (d.input.old_str != null || d.input.file_text != null || d.input.insert_text != null)) {
           det.append(h("pre", null, d.input.file_text ?? d.input.insert_text ?? `- ${d.input.old_str}\n+ ${d.input.new_str ?? ""}`));
         }
+        det.dataset.readOnly = String(label === "Read");
         toolEls[d.id] = det; add(det); break;
       }
       case "tool_result": {
         const det = toolEls[d.id]; if (!det) break;
         if (d.is_error) det.classList.add("err");
-        det.append(h("pre", null, d.output)); break;
+        det.append(h("pre", null, d.output));
+        // Anything but a file read may have changed the workspace.
+        if (!replaying && det.dataset.readOnly !== "true") scheduleDiff();
+        break;
       }
       case "status":
         endLive(); setStatus(d.status);
-        if (d.status === "completed") add(h("div", "ev-status completed", "✓ Task completed — review the changes tab"));
-        else if (d.status === "failed") add(h("div", "ev-status failed", "Failed: " + (d.error || "unknown error")));
+        if (d.status === "completed") {
+          const s = h("div", "ev-status completed"); s.append(icon("check", "i"), h("span", null, "Task completed"));
+          const view = h("button", null, "View changes"); view.onclick = () => setPanel(true); s.append(view); add(s);
+          const wasLive = !replaying;
+          loadDiff().then(() => { if (wasLive && lastFiles && !isMobile()) setPanel(true); });
+        } else if (d.status === "failed") add(h("div", "ev-status failed", "Failed: " + (d.error || "unknown error")));
         else if (d.status === "cancelled") add(h("div", "ev-status", "Stopped"));
         refreshList(); break;
       case "commit": add(h("div", "ev-log", `Committed ${d.commit.slice(0, 8)} on ${d.branch}${d.pushed ? " and pushed" : ""}`)); break;
     }
-    stick();
+    if (!replaying) stick();
   };
-  refreshList();
+  renderList(); refreshList();
 }
 
-async function loadDiff(id, box) {
-  box.replaceChildren(h("div", "muted", "Loading changes…"));
-  const { diff } = await api(`/api/tasks/${id}/diff`);
-  box.replaceChildren();
-  const files = diff.split(/^(?=diff --git )/m).filter((c) => c.trim());
-  let adds = 0, dels = 0;
-  for (const l of diff.split("\n")) { if (l.startsWith("+") && !l.startsWith("+++")) adds++; else if (l.startsWith("-") && !l.startsWith("---")) dels++; }
-  const actions = h("div", "actions");
-  actions.append(h("span", "stat", files.length ? `${files.length} file${files.length > 1 ? "s" : ""} changed · +${adds} −${dels}` : "No changes yet"));
-  const commitBtn = h("button", null, "Commit to branch"), pushBtn = h("button", "accent", "Commit & push");
-  const doCommit = async (push) => {
-    const message = prompt("Commit message:", current.title); if (message === null) return;
-    try { const r = await api(`/api/tasks/${id}/commit`, { method: "POST", body: JSON.stringify({ message, push }) }); alert(`Committed ${r.commit.slice(0, 8)} on ${r.branch}${r.pushed ? " and pushed" : ""}`); }
-    catch (err) { alert(err.message); }
-  };
-  commitBtn.onclick = () => doCommit(false); pushBtn.onclick = () => doCommit(true);
-  commitBtn.disabled = !files.length; pushBtn.disabled = !files.length || !current.repo_url;
-  actions.append(commitBtn, pushBtn); box.append(actions);
-  for (const chunk of files) {
-    const lines = chunk.split("\n");
-    const m = /^diff --git a\/(.*) b\/(.*)$/.exec(lines[0]);
-    let fa = 0, fd = 0;
-    for (const l of lines) { if (l.startsWith("+") && !l.startsWith("+++")) fa++; else if (l.startsWith("-") && !l.startsWith("---")) fd++; }
-    const file = h("div", "file"); const name = h("div", "fname"); name.append(h("span", null, m ? m[2] : lines[0]), h("span", null, `+${fa} −${fd}`)); file.append(name);
-    const pre = h("pre");
-    let started = false;
-    for (const line of lines.slice(1)) {
-      if (line.startsWith("@@")) started = true;
-      if (!started) continue;
-      const cls = line.startsWith("@@") ? "h" : line.startsWith("+") ? "a" : line.startsWith("-") ? "d" : "";
-      pre.append(h("span", "ln " + cls, line || " "));
-    }
-    if (!started) pre.append(h("span", "ln muted", "(binary or mode change)"));
-    file.append(pre); box.append(file);
-  }
-}
-
-function route() { $("#sidebar").classList.remove("open"); const id = location.hash.slice(1); id ? showTask(id) : showNew(); }
+function route() { app.classList.remove("side-open"); const id = location.hash.slice(1); id ? showTask(id) : showNew(); }
 window.addEventListener("hashchange", route);
-document.addEventListener("click", (e) => { if (e.target.closest("[data-menu]")) $("#sidebar").classList.toggle("open"); });
-$("#newBtn").onclick = () => { location.hash = ""; route(); };
-api("/api/config").then((c) => { $("#cfg").textContent = `${c.model} · ${c.sandbox} sandbox`; }).catch(() => {});
+$("#newBtn").onclick = () => { if (location.hash) location.hash = ""; else route(); };
+api("/api/config").then((c) => { config = c; $("#cfg").textContent = `${c.model} · ${c.sandbox} sandbox`; const tag = $("#modelTag"); if (tag) tag.textContent = c.model; }).catch(() => {});
 route();
 setInterval(refreshList, 10000);
 </script>

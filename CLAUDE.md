@@ -18,6 +18,7 @@ returns a reviewable diff. It is separate from the NOVA MIND chat product in
 - `nova_agent/agent.py` — the agent loop (streaming Messages API, append-only transcript)
 - `nova_agent/tasks.py` — task lifecycle, event log, persistence to `data/tasks/*.json`, diff/commit
 - `nova_agent/server.py` — FastAPI REST + SSE API; serves `nova_agent/static/index.html`
+- `deploy/` — production stack (docker compose + Caddy) and `install.sh` for a VPS
 - `tests/` — pytest; `tests/fakes.py` provides a scripted fake Anthropic client
 
 ## Commands
