@@ -98,107 +98,152 @@
   }
 
   /* ---------- Right: main area ---------- */
+  :root { --kw: #2f6fb0; --sub: #b5651d; --str: #3f7d3a; }
+  :root[data-theme="dark"] { --kw: #82b4ea; --sub: #e3a369; --str: #9fce92; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --kw: #82b4ea; --sub: #e3a369; --str: #9fce92; } }
+
   main { flex: 1; display: flex; min-width: 0; min-height: 0; }
   .chat { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-  .column { width: min(740px, 100%); margin: 0 auto; }
-  .topbar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; min-height: 58px; }
-  .topbar .title { flex: 1; min-width: 0; padding-left: 4px; }
-  .topbar .title div { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .topbar .title small { color: var(--muted); font-size: 12px; display: flex; gap: 6px; align-items: center; white-space: nowrap; overflow: hidden; }
-  .changes-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 12px; flex: none; }
-  .changes-btn .count { font-size: 12px; }
+  .column { width: min(760px, 100%); margin: 0 auto; }
+
+  /* Top bar: side | centered title | side */
+  .topbar { display: grid; grid-template-columns: 220px minmax(0, 1fr) 220px; align-items: center; padding: 10px 12px; min-height: 64px; }
+  .tb-side { display: flex; align-items: center; gap: 2px; }
+  .tb-side.right { justify-content: flex-end; }
+  .topbar .title { text-align: center; min-width: 0; line-height: 1.3; }
+  .topbar .title div { font-size: 16.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar .title small { color: var(--muted); font-size: 13.5px; display: flex; gap: 6px; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; }
+  .changes-btn { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; padding: 6px 10px; border-color: transparent; position: relative; }
+  .changes-btn:hover { background: var(--hover); }
+  .changes-btn svg { width: 20px; height: 20px; }
+  .changes-btn .count { font-size: 12.5px; white-space: nowrap; }
   .changes-btn .count b { color: var(--add-fg); font-weight: 600; } .changes-btn .count i { color: var(--del-fg); font-style: normal; font-weight: 600; }
   .changes-btn.on { background: var(--panel); box-shadow: var(--shadow); }
+  .changes-btn .badge { display: none; position: absolute; top: 5px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
   .mobile-only { display: none !important; }
+  .menu-wrap { position: relative; }
+  .dropdown { position: absolute; right: 0; top: 40px; z-index: 12; min-width: 190px; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 6px; display: none; }
+  .dropdown.open { display: block; }
+  .dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; text-align: left; padding: 8px 10px; font-size: 14px; }
+  .dropdown button svg { width: 17px; height: 17px; color: var(--muted); }
+  .dropdown button.danger, .dropdown button.danger svg { color: var(--err); }
 
-  .composer { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); padding: 14px 12px 10px 16px; transition: border-color .15s; }
-  .composer:focus-within { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
-  .composer textarea { resize: none; min-height: 26px; max-height: 240px; display: block; padding: 0 4px 0 2px; }
-  .composer .bar { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
-  .composer .extras { display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  /* Composer: suggestion chip, text, then + / model pill / mic / send */
+  .composer { background: var(--panel); border: 1px solid var(--border); border-radius: 28px; box-shadow: var(--shadow); padding: 16px 12px 12px 18px; transition: border-color .15s; }
+  .composer:focus-within { border-color: color-mix(in srgb, var(--text) 18%, var(--border)); }
+  .composer textarea { resize: none; min-height: 28px; max-height: 240px; display: block; padding: 2px 6px 2px 2px; font-size: 16px; line-height: 1.5; }
+  .suggest { display: none; align-items: center; gap: 10px; margin: 0 0 10px; }
+  .suggest.show { display: flex; }
+  .suggest .s-text { color: var(--muted); font-size: 16px; }
+  .suggest button { width: 30px; height: 26px; padding: 0; display: grid; place-items: center; border-radius: 999px; color: var(--muted); }
+  .suggest button svg { width: 14px; height: 14px; }
+  .composer .bar { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+  .composer .extras { display: none; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .composer.show-extras .extras { display: flex; }
-  .composer .plus-btn { width: 32px; height: 32px; border: 1px solid var(--border); color: var(--muted); }
+  .round { width: 44px; height: 44px; padding: 0; border-radius: 50%; display: grid; place-items: center; flex: none; }
+  .round svg { width: 20px; height: 20px; }
+  .plus-btn { border: 1px solid var(--border); color: var(--text); }
   .composer.show-extras .plus-btn { color: var(--accent-strong); border-color: var(--accent); background: var(--accent-soft); }
-  .chip { display: flex; align-items: center; gap: 6px; background: var(--soft); border-radius: 999px; padding: 4px 12px; min-width: 0; flex: 1 1 260px; }
+  .model-pill { height: 44px; padding: 0 18px; border-radius: 999px; background: var(--soft); border: 0; font-size: 15px; white-space: nowrap; display: inline-flex; align-items: center; cursor: default; }
+  .model-pill:hover { background: var(--soft); }
+  .bar .spacer { flex: 1; min-width: 0; }
+  .mic { background: var(--soft); border: 0; color: var(--text); }
+  .mic:hover { background: var(--hover); }
+  .mic.on { background: var(--accent-soft); color: var(--accent-strong); animation: pulse 1.2s ease-in-out infinite; }
+  .send { background: var(--accent); border: 0; color: #fff; }
+  .send:hover { background: var(--accent-strong); }
+  .send.idle { opacity: .5; }
+  .send.idle:hover { background: var(--accent); }
+  .chip { display: flex; align-items: center; gap: 6px; background: var(--soft); border-radius: 999px; padding: 6px 14px; min-width: 0; flex: 1 1 260px; }
   .chip svg { width: 14px; height: 14px; color: var(--muted); flex: none; }
-  .chip input { font-size: 13px; padding: 2px 0; min-width: 0; }
-  .chip.branch { flex: 0 1 170px; }
-  .repo-tag { font-size: 12.5px; color: var(--muted); background: var(--soft); border-radius: 999px; padding: 3px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
-  .model-tag { margin-left: auto; font-size: 13px; color: var(--muted); padding: 0 6px; white-space: nowrap; }
-  .send { width: 32px; height: 32px; padding: 0; border-radius: 10px; display: grid; place-items: center; flex: none; }
-  .bar .send { margin-left: 0; }
-  .send svg { width: 16px; height: 16px; }
+  .chip input { font-size: 14px; padding: 2px 0; min-width: 0; }
+  .chip.branch { flex: 0 1 180px; }
+  .repo-tag { font-size: 13px; color: var(--muted); background: var(--soft); border-radius: 999px; padding: 4px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
   .welcome { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 24px 16px 12vh; overflow-y: auto; }
   .welcome h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 4vw, 40px); letter-spacing: -.02em; line-height: 1.2; text-align: center; margin: 0 0 28px; display: flex; align-items: center; justify-content: center; gap: 14px; }
   .welcome h1 svg { width: 34px; height: 34px; color: var(--accent); flex: none; }
   .welcome .composer textarea { min-height: 56px; }
   .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
-  .suggestions button { font-size: 13px; color: var(--muted); border-radius: 999px; padding: 5px 14px; background: var(--panel); display: inline-flex; gap: 6px; align-items: center; }
+  .suggestions button { font-size: 13.5px; color: var(--muted); border-radius: 999px; padding: 6px 14px; background: var(--panel); display: inline-flex; gap: 6px; align-items: center; }
   .suggestions button svg { width: 14px; height: 14px; }
   .suggestions button:hover { color: var(--text); }
 
-  .pane { flex: 1; overflow-y: auto; padding: 12px 20px; min-height: 0; }
-  .timeline { display: flex; flex-direction: column; gap: 14px; padding-bottom: 8px; }
-  .ev-user { align-self: flex-end; background: var(--soft); padding: 10px 16px; border-radius: 18px; max-width: 85%; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .ev-msg { overflow-wrap: anywhere; }
-  .ev-msg p { margin: 0 0 .7em; } .ev-msg p:last-child { margin-bottom: 0; }
-  .ev-msg ul, .ev-msg ol { margin: 0 0 .7em; padding-left: 1.4em; }
-  .ev-msg code { font-family: var(--mono); font-size: .87em; background: var(--code-bg); border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; }
-  .ev-msg pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; overflow-x: auto; margin: 0 0 .7em; }
-  .ev-msg pre code { background: none; border: 0; padding: 0; }
-  .ev-msg h3 { font-family: var(--serif); font-weight: 600; font-size: 1.1em; margin: .6em 0 .3em; }
-  .ev-think { color: var(--muted); font-size: 13.5px; white-space: pre-wrap; border-left: 2px solid var(--border); padding: 2px 0 2px 12px; }
+  /* Conversation */
+  .pane { flex: 1; overflow-y: auto; padding: 8px 20px 16px; min-height: 0; }
+  .timeline { display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; }
+  .ev-user { align-self: flex-end; background: var(--soft); padding: 11px 18px; border-radius: 22px; max-width: 85%; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; }
+  .ev-msg { overflow-wrap: anywhere; font-size: 16.5px; line-height: 1.7; }
+  .ev-msg p { margin: 0 0 .8em; } .ev-msg p:last-child { margin-bottom: 0; }
+  .ev-msg ul, .ev-msg ol { margin: 0 0 .8em; padding-left: 1.3em; }
+  .ev-msg li { margin: .2em 0; padding-left: .2em; }
+  .ev-msg strong { font-weight: 650; }
+  .ev-msg code { font-family: var(--mono); font-size: .86em; color: var(--kw); background: var(--soft); border-radius: 6px; padding: 2px 6px; }
+  .ev-msg h3 { font-family: var(--serif); font-weight: 600; font-size: 1.15em; margin: .7em 0 .3em; }
+  .ev-msg > .codecard { margin: 4px 0 .9em; }
+  .msg-actions { display: flex; gap: 4px; margin-top: 10px; }
+  .msg-actions button { width: 34px; height: 34px; }
+  .ev-think { color: var(--muted); font-size: 14px; white-space: pre-wrap; border-left: 2px solid var(--border); padding: 2px 0 2px 12px; }
   .ev-think::before { content: "Thinking"; display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: .8; margin-bottom: 2px; }
-  .ev-log { color: var(--muted); font-size: 12.5px; display: flex; align-items: center; gap: 8px; }
+  .ev-log { color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 8px; }
   .ev-log::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--border); flex: none; }
-  .ev-status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ev-status { font-size: 14px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .ev-status.failed { color: var(--err); } .ev-status.completed { color: var(--ok); }
-  .ev-status button { font-size: 12.5px; padding: 3px 10px; color: var(--text); }
-  .working { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+  .ev-status button { font-size: 13px; padding: 4px 12px; color: var(--text); border-radius: 999px; }
+  .working { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; }
   .working svg { width: 22px; height: 22px; color: var(--accent); animation: spin 2.4s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  details.tool { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); overflow: hidden; }
-  details.tool summary { padding: 8px 12px; cursor: pointer; font-size: 13px; list-style: none; display: flex; gap: 10px; align-items: center; }
-  details.tool summary::-webkit-details-marker { display: none; }
-  details.tool summary:hover { background: var(--soft); }
-  details.tool summary .k { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-strong); background: var(--accent-soft); border-radius: 6px; padding: 1px 7px; flex: none; }
-  details.tool summary .c { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-  details.tool summary .chev { color: var(--muted); transition: transform .15s; flex: none; }
-  details.tool[open] summary .chev { transform: rotate(90deg); }
-  details.tool.err summary .k { color: var(--err); background: var(--del-bg); }
-  pre { margin: 0; font-family: var(--mono); font-size: 12.5px; white-space: pre-wrap; word-break: break-word; }
-  details.tool pre { padding: 10px 14px; border-top: 1px solid var(--border); background: var(--code-bg); max-height: 420px; overflow: auto; }
   .live { opacity: .8; white-space: pre-wrap; }
 
-  .followup { padding: 6px 20px calc(14px + env(safe-area-inset-bottom)); }
-  .followup .composer { padding: 10px 10px 10px 16px; border-radius: 18px; }
-  .followup .composer .row { display: flex; align-items: flex-end; gap: 8px; }
-  .followup .composer textarea { padding: 5px 0; }
-  .hint { text-align: center; color: var(--muted); font-size: 12px; margin-top: 8px; }
+  /* Code card (message code blocks and tool calls) */
+  .codecard { background: var(--soft); border-radius: 18px; overflow: hidden; }
+  .cc-head { display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 18px; }
+  .cc-label { flex: 1; min-width: 0; color: var(--muted); font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-label b { color: var(--text); font-weight: 500; }
+  .cc-head button { width: 34px; height: 34px; }
+  .cc-body { margin: 0; padding: 4px 18px 16px; overflow-x: auto; white-space: pre; font-family: var(--mono); font-size: 14px; line-height: 1.6; word-break: normal; max-height: 360px; }
+  .cc-body code { font: inherit; color: var(--text); background: none; padding: 0; }
+  .tk-k { color: var(--kw); } .tk-sub { color: var(--sub); } .tk-s { color: var(--str); }
+  .tk-f, .tk-o { color: var(--muted); } .tk-c { color: var(--muted); font-style: italic; }
+  .codecard.expanded { position: fixed; inset: max(12px, env(safe-area-inset-top)) 12px 12px; z-index: 30; display: flex; flex-direction: column; box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .4); background: var(--panel); }
+  .codecard.expanded .cc-body { flex: 1; max-height: none; }
+  details.cc-out { border-top: 1px solid var(--border); }
+  details.cc-out summary { list-style: none; cursor: pointer; padding: 8px 18px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  details.cc-out summary::-webkit-details-marker { display: none; }
+  details.cc-out summary::before { content: "›"; display: inline-block; transition: transform .15s; }
+  details.cc-out[open] summary::before { transform: rotate(90deg); }
+  details.cc-out.err summary { color: var(--err); }
+  details.cc-out pre { margin: 0; padding: 0 18px 14px; font-family: var(--mono); font-size: 13px; white-space: pre-wrap; word-break: break-word; max-height: 360px; overflow: auto; color: var(--muted); }
+  .tool-line { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
+  .tool-line svg { width: 16px; height: 16px; }
+  .tool-line code { font-family: var(--mono); font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tool-line.err { color: var(--err); }
+
+  .followup { padding: 6px 16px calc(12px + env(safe-area-inset-bottom)); }
 
   /* Right-hand Changes panel */
   .panel { width: 0; flex: none; overflow: hidden; border-left: 1px solid transparent; background: var(--panel); display: flex; flex-direction: column; transition: width .22s ease; }
   main.panel-open .panel { width: min(46vw, 720px); border-left-color: var(--border); }
   .panel-inner { width: min(46vw, 720px); min-width: 0; display: flex; flex-direction: column; height: 100%; }
-  .panel-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px 10px 18px; min-height: 58px; border-bottom: 1px solid var(--border); }
+  .panel-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px 10px 18px; min-height: 64px; border-bottom: 1px solid var(--border); }
   .panel-head .ttl { flex: 1; min-width: 0; line-height: 1.3; }
-  .panel-head .ttl b { font-family: var(--serif); font-weight: 600; font-size: 16px; display: block; }
-  .panel-head .ttl small { color: var(--muted); font-size: 12px; }
+  .panel-head .ttl b { font-weight: 600; font-size: 16.5px; display: block; }
+  .panel-head .ttl small { color: var(--muted); font-size: 13px; }
   .panel-actions { display: flex; gap: 8px; padding: 10px 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-  .panel-actions button { font-size: 13px; }
+  .panel-actions button { font-size: 14px; border-radius: 999px; padding: 7px 16px; }
   .panel-body { flex: 1; overflow: auto; padding: 14px 18px calc(14px + env(safe-area-inset-bottom)); }
-  .diff .file { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px; overflow: hidden; background: var(--bg); }
-  .diff .fname { padding: 8px 14px; font-family: var(--mono); font-size: 12.5px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; background: var(--panel); }
+  .diff .file { border-radius: 16px; margin-bottom: 14px; overflow: hidden; background: var(--soft); }
+  .diff .fname { padding: 10px 16px; font-family: var(--mono); font-size: 13px; display: flex; justify-content: space-between; gap: 8px; }
   .diff .fname span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .diff .fname span:last-child { color: var(--muted); flex: none; }
-  .diff pre { overflow-x: auto; white-space: pre; }
-  .diff .ln { display: block; padding: 0 14px; min-height: 1.6em; }
+  .diff pre { overflow-x: auto; white-space: pre; font-family: var(--mono); font-size: 13px; margin: 0; padding-bottom: 8px; }
+  .diff .ln { display: block; padding: 0 16px; min-height: 1.6em; }
   .diff .a { background: var(--add-bg); color: var(--add-fg); } .diff .d { background: var(--del-bg); color: var(--del-fg); }
-  .diff .h { background: var(--hunk); color: var(--muted); }
+  .diff .h { color: var(--muted); }
   .muted { color: var(--muted); }
   .scrim { display: none; }
+  .toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 14px; z-index: 40; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
 
   @media (max-width: 1000px) {
     main.panel-open .panel { position: fixed; inset: 0; width: 100%; z-index: 6; border-left: 0; }
@@ -210,14 +255,16 @@
     .app.side-open .scrim { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, .32); z-index: 7; }
     .desk-only { display: none !important; }
     .mobile-only { display: inline-grid !important; }
-    .pane, .followup { padding-left: 14px; padding-right: 14px; }
-    .topbar { padding: 8px; }
-    .changes-btn .lbl { display: none; }
+    .topbar { grid-template-columns: 88px minmax(0, 1fr) 88px; padding: 8px 6px; }
+    .changes-btn .lbl, .changes-btn .count { display: none; }
+    .changes-btn .badge.has { display: block; }
+    .changes-btn { width: 42px; height: 42px; padding: 0; justify-content: center; }
+    .pane { padding-left: 18px; padding-right: 18px; }
+    .followup { padding-left: 12px; padding-right: 12px; }
+    .ev-msg { font-size: 17px; }
     .welcome { padding-bottom: 8vh; }
     .welcome h1 { flex-direction: column; gap: 10px; }
     .chip, .chip.branch { flex: 1 1 100%; }
-    .model-tag { display: none; }
-    .bar .send { margin-left: auto; }
   }
 </style>
 </head>
@@ -225,20 +272,29 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="spark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5c.5 0 .9.35 1 .84l.9 5.1 4.36-2.8a1 1 0 0 1 1.38 1.38l-2.8 4.36 5.1.9a1 1 0 0 1 0 1.97l-5.1.9 2.8 4.36a1 1 0 0 1-1.38 1.38l-4.36-2.8-.9 5.1a1 1 0 0 1-1.97 0l-.9-5.1-4.36 2.8a1 1 0 0 1-1.38-1.38l2.8-4.36-5.1-.9a1 1 0 0 1 0-1.97l5.1-.9-2.8-4.36A1 1 0 0 1 5.74 4.64l4.36 2.8.9-5.1c.1-.49.5-.84 1-.84Z"/></symbol>
   <symbol id="arrow" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m-6 6 6-6 6 6"/></symbol>
-  <symbol id="plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="back" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 12H4m6-6-6 6 6 6"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 4v16M4 12h16"/></symbol>
   <symbol id="search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></g></symbol>
   <symbol id="i-sidebar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></g></symbol>
   <symbol id="menu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="dots" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></g></symbol>
+  <symbol id="pr" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5.5" r="2.5"/><circle cx="6" cy="18.5" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M6 8v8M18 16V9a3 3 0 0 0-3-3h-4m2-2.5L10.5 6 13 8.5"/></g></symbol>
   <symbol id="repo" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5"/></symbol>
   <symbol id="branch" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 3v12m0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm12-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0a9 9 0 0 1-9 9"/></symbol>
-  <symbol id="stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></symbol>
-  <symbol id="diff" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/></g></symbol>
+  <symbol id="stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></symbol>
   <symbol id="close" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/></symbol>
   <symbol id="trash" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></symbol>
   <symbol id="theme" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path fill="currentColor" stroke="none" d="M12 3.5a8.5 8.5 0 0 1 0 17z"/></g></symbol>
   <symbol id="bug" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M3 13h4M17 13h4M4 7l3 2M20 7l-3 2M4 19l3-2M20 19l-3-2"/></g></symbol>
   <symbol id="check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m5 12 4.5 4.5L19 7"/></symbol>
   <symbol id="book" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zm0 16a2 2 0 0 1 2-2h13v2"/></symbol>
+  <symbol id="copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/></g></symbol>
+  <symbol id="expand" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"/></symbol>
+  <symbol id="shrink" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M20 4l-7 7m0-5v5h5M4 20l7-7m0 5v-5H6"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M7 4.5v15l12.5-7.5z"/></symbol>
+  <symbol id="mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6"/></g></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="file" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></g></symbol>
 </svg>
 
 <div class="app" id="app">
@@ -262,54 +318,31 @@
   <div class="scrim" data-close-side></div>
   <main id="main"></main>
 </div>
-
-<template id="newTpl">
-  <div class="chat">
-    <div class="topbar"><button class="icon-btn mobile-only" data-open-side aria-label="Open sidebar"><svg><use href="#menu"/></svg></button></div>
-    <div class="welcome">
-      <div class="column">
-        <h1><svg><use href="#spark"/></svg><span id="greeting">What should we build today?</span></h1>
-        <form class="composer" id="createForm">
-          <textarea name="prompt" rows="2" placeholder="How can NOVA help you today?" required></textarea>
-          <div class="extras">
-            <label class="chip"><svg><use href="#repo"/></svg><input name="repo_url" placeholder="https://github.com/owner/repo"></label>
-            <label class="chip branch"><svg><use href="#branch"/></svg><input name="branch" placeholder="branch (optional)"></label>
-          </div>
-          <div class="bar">
-            <button type="button" class="icon-btn plus-btn" id="extrasBtn" title="Connect a repository" aria-label="Connect a repository"><svg><use href="#plus"/></svg></button>
-            <span class="repo-tag" id="repoTag" hidden></span>
-            <span class="model-tag" id="modelTag"></span>
-            <button class="send accent" type="submit" aria-label="Start task"><svg><use href="#arrow"/></svg></button>
-          </div>
-        </form>
-        <div class="suggestions">
-          <button type="button" data-s="Find and fix a failing test"><svg><use href="#bug"/></svg>Fix a failing test</button>
-          <button type="button" data-s="Add input validation and write tests for it"><svg><use href="#check"/></svg>Add validation + tests</button>
-          <button type="button" data-s="Read this codebase and write a clear README"><svg><use href="#book"/></svg>Write a README</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
+<div class="toast" id="toast"></div>
 
 <script>
 const $ = (sel, el = document) => el.querySelector(sel);
 const h = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const icon = (id, cls) => { const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); if (cls) s.setAttribute("class", cls); const u = document.createElementNS("http://www.w3.org/2000/svg", "use"); u.setAttribute("href", "#" + id); s.append(u); return s; };
+const iconBtn = (id, label, cls = "icon-btn") => { const b = h("button", cls); b.type = "button"; b.append(icon(id)); b.title = label; b.setAttribute("aria-label", label); return b; };
+const span = (cls, text) => h("span", cls, text);
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
 const app = $("#app");
 const isMobile = () => matchMedia("(max-width: 760px)").matches;
 
+function toast(text) { const t = $("#toast"); t.textContent = text; t.classList.add("show"); clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove("show"), 1600); }
+
 // Theme: follow the system unless the viewer picked one.
 const savedTheme = store.get("nova-theme");
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
-$("#themeBtn").onclick = () => {
+function toggleTheme() {
   const dark = document.documentElement.dataset.theme
     ? document.documentElement.dataset.theme === "dark"
     : matchMedia("(prefers-color-scheme: dark)").matches;
   document.documentElement.dataset.theme = dark ? "light" : "dark";
   store.set("nova-theme", document.documentElement.dataset.theme);
-};
+}
+$("#themeBtn").onclick = toggleTheme;
 
 // Sidebar: collapsible rail on desktop, slide-in drawer on phones.
 if (store.get("nova-collapsed") === "1") app.classList.add("collapsed");
@@ -319,7 +352,9 @@ $("#searchBox").onclick = () => { if (app.classList.contains("collapsed") && !is
 document.addEventListener("click", (e) => {
   if (e.target.closest("[data-open-side]")) app.classList.add("side-open");
   else if (e.target.closest("[data-close-side]")) app.classList.remove("side-open");
+  if (!e.target.closest(".menu-wrap")) document.querySelectorAll(".dropdown.open").forEach((d) => d.classList.remove("open"));
 });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelectorAll(".codecard.expanded").forEach((c) => c.querySelector("[data-expand]").click()); });
 
 let token = store.get("nova-token") || "";
 let current = null, source = null, config = { model: "", sandbox: "" }, allTasks = [];
@@ -336,22 +371,80 @@ async function api(path, opts = {}) {
   return res.status === 204 ? null : res.json();
 }
 
-const repoName = (url) => url.replace(/^https:\/\/(www\.)?github\.com\//, "").replace(/\.git$/, "");
+const repoName = (url) => url.replace(/^https:\/\/(www\.)?github\.com\//, "").replace(/\.git$/, "").split("/").pop();
+const prettyModel = (m) => { const x = /^claude-([a-z]+)-(\d+)(?:-(\d+))?/.exec(m || ""); return x ? x[1][0].toUpperCase() + x[1].slice(1) + " " + x[2] + (x[3] ? "." + x[3] : "") : (m || "NOVA"); };
 
-// Minimal, safe Markdown: escape everything first, then add a fixed set of tags.
-function markdown(src) {
+async function copyText(text, btn) {
+  try { await navigator.clipboard.writeText(text); } catch {
+    const ta = h("textarea"); ta.value = text; document.body.append(ta); ta.select();
+    try { document.execCommand("copy"); } catch {} ta.remove();
+  }
+  if (btn) { btn.replaceChildren(icon("check")); setTimeout(() => btn.replaceChildren(icon("copy")), 1200); }
+  toast("Copied");
+}
+
+// Light shell highlighting, built from text nodes (no HTML parsing).
+const SUBCMD = new Set(["git", "npm", "npx", "pip", "pip3", "docker", "yarn", "pnpm", "cargo", "go", "apt", "apt-get", "kubectl", "systemctl", "uv", "poetry"]);
+const KEYWORDS = new Set(["cd", "sudo", "export", "echo", "source", "set", "if", "then", "else", "fi", "for", "do", "done", "exit", "while", "cat", "ls", "mkdir", "rm", "cp", "mv", "chmod", "curl", "python", "python3", "pytest", "node", "bash", "sh", "make"]);
+function highlightShell(code) {
+  const frag = document.createDocumentFragment();
+  code.split("\n").forEach((line, li) => {
+    if (li) frag.append("\n");
+    const re = /(#.*$)|('[^']*'|"(?:[^"\\]|\\.)*")|(\s+)|([^\s'"]+)|([\s\S])/g;
+    let m, word = 0, prev = "";
+    while ((m = re.exec(line))) {
+      if (m[1]) { frag.append(span("tk-c", m[1])); break; }
+      if (m[2]) { frag.append(span("tk-s", m[2])); word++; continue; }
+      if (m[3]) { frag.append(m[3]); continue; }
+      if (m[5]) { frag.append(m[5]); continue; }
+      const t = m[4];
+      let cls = null;
+      if (/^(&&|\|\||\||;|>|>>|<)$/.test(t)) { cls = "tk-o"; frag.append(span(cls, t)); word = 0; prev = ""; continue; }
+      if (t.startsWith("-")) cls = "tk-f";
+      else if (word === 0 && KEYWORDS.has(t)) cls = "tk-k";
+      else if (word === 0 && SUBCMD.has(t)) cls = null;
+      else if (word === 1 && SUBCMD.has(prev)) cls = "tk-sub";
+      else if (word === 1 && prev === "sudo") cls = "tk-sub";
+      frag.append(cls ? span(cls, t) : t);
+      prev = t; word++;
+    }
+  });
+  return frag;
+}
+const SHELL = new Set(["bash", "sh", "shell", "zsh", "console", "terminal", ""]);
+const LANG_NAMES = { py: "Python", js: "JavaScript", ts: "TypeScript", jsx: "JSX", tsx: "TSX", html: "HTML", css: "CSS", json: "JSON", md: "Markdown", yml: "YAML", yaml: "YAML", sh: "Bash", bash: "Bash", sql: "SQL", go: "Go", rs: "Rust", java: "Java", toml: "TOML", dockerfile: "Dockerfile" };
+const langLabel = (lang) => LANG_NAMES[(lang || "").toLowerCase()] || (lang ? lang[0].toUpperCase() + lang.slice(1) : "Code");
+
+// A rounded code card with a label, copy and expand buttons.
+function codeCard(label, code, { shell = false, labelNode = null } = {}) {
+  const card = h("div", "codecard");
+  const head = h("div", "cc-head");
+  const lbl = h("span", "cc-label"); if (labelNode) lbl.append(labelNode); else lbl.textContent = label;
+  const copy = iconBtn("copy", "Copy"); copy.onclick = () => copyText(code, copy);
+  const exp = iconBtn("expand", "Expand"); exp.dataset.expand = "";
+  exp.onclick = () => { const on = card.classList.toggle("expanded"); exp.replaceChildren(icon(on ? "shrink" : "expand")); exp.title = on ? "Close" : "Expand"; };
+  head.append(lbl, copy, exp);
+  const pre = h("pre", "cc-body"); const c = h("code");
+  if (shell) c.append(highlightShell(code)); else c.textContent = code;
+  pre.append(c); card.append(head, pre);
+  return card;
+}
+
+// Minimal, safe Markdown: escape everything first, add a fixed set of tags,
+// and swap fenced code for code cards built from text nodes.
+function renderMarkdown(src) {
   const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const inline = (s) => esc(s)
     .replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
-  const out = []; const lines = src.split("\n"); let i = 0;
+  const out = [], blocks = []; const lines = src.split("\n"); let i = 0;
   while (i < lines.length) {
     const line = lines[i];
     if (line.startsWith("```")) {
-      const code = []; i++;
+      const lang = line.slice(3).trim(); const code = []; i++;
       while (i < lines.length && !lines[i].startsWith("```")) code.push(lines[i++]);
-      i++; out.push(`<pre><code>${esc(code.join("\n"))}</code></pre>`); continue;
+      i++; blocks.push({ lang, code: code.join("\n") }); out.push(`<div data-code="${blocks.length - 1}"></div>`); continue;
     }
     const heading = /^(#{1,3})\s+(.*)$/.exec(line);
     if (heading) { out.push(`<h3>${inline(heading[2])}</h3>`); i++; continue; }
@@ -365,7 +458,12 @@ function markdown(src) {
     while (i < lines.length && lines[i].trim() && !/^(```|#{1,3}\s|\s*([-*]|\d+\.)\s+)/.test(lines[i])) para.push(lines[i++]);
     out.push(`<p>${inline(para.join("\n")).replace(/\n/g, "<br>")}</p>`);
   }
-  return out.join("");
+  const el = h("div", "ev-msg"); el.innerHTML = out.join("");
+  el.querySelectorAll("[data-code]").forEach((ph) => {
+    const b = blocks[+ph.dataset.code];
+    ph.replaceWith(codeCard(langLabel(b.lang || "bash"), b.code, { shell: SHELL.has(b.lang.toLowerCase()) }));
+  });
+  return el;
 }
 
 function autosize(ta) { const fit = () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 240) + "px"; }; ta.addEventListener("input", fit); fit(); }
@@ -375,6 +473,55 @@ function diffStats(diff) {
   let adds = 0, dels = 0;
   for (const l of diff.split("\n")) { if (l.startsWith("+") && !l.startsWith("+++")) adds++; else if (l.startsWith("-") && !l.startsWith("---")) dels++; }
   return { files, adds, dels };
+}
+
+// The shared composer: optional suggestion, text, then + / model / mic / send.
+function buildComposer({ placeholder, name = "prompt", withExtras = false }) {
+  const form = h("form", "composer column");
+  const suggest = h("div", "suggest"); const sText = h("span", "s-text"); const sGo = iconBtn("chev", "Use suggestion", "");
+  suggest.append(sText, sGo);
+  const input = h("textarea"); input.name = name; input.rows = 1; input.placeholder = placeholder;
+  form.append(suggest, input);
+  let extras = null;
+  if (withExtras) {
+    extras = h("div", "extras");
+    const repo = h("label", "chip"); repo.append(icon("repo")); const ri = h("input"); ri.name = "repo_url"; ri.placeholder = "https://github.com/owner/repo"; repo.append(ri);
+    const br = h("label", "chip branch"); br.append(icon("branch")); const bi = h("input"); bi.name = "branch"; bi.placeholder = "branch (optional)"; br.append(bi);
+    extras.append(repo, br); form.append(extras);
+  }
+  const bar = h("div", "bar");
+  const plus = iconBtn("plus", withExtras ? "Connect a repository" : "New task", "round plus-btn");
+  const model = h("span", "model-pill", prettyModel(config.model)); model.dataset.model = "";
+  const tag = h("span", "repo-tag"); tag.hidden = true;
+  const mic = iconBtn("mic", "Dictate", "round mic");
+  const send = h("button", "round send idle"); send.type = "submit"; send.append(icon("arrow")); send.setAttribute("aria-label", "Send");
+  bar.append(plus, model, tag, h("span", "spacer"), mic, send);
+  form.append(bar);
+
+  const state = { busy: false };
+  const refresh = () => send.classList.toggle("idle", !state.busy && !input.value.trim());
+  input.addEventListener("input", refresh);
+  const setSuggestion = (text, onUse) => {
+    suggest.classList.toggle("show", !!text); sText.textContent = text || "";
+    sGo.onclick = () => onUse && onUse();
+  };
+  const setBusy = (busy) => {
+    state.busy = busy; send.replaceChildren(icon(busy ? "stop" : "arrow"));
+    send.setAttribute("aria-label", busy ? "Stop" : "Send"); send.title = busy ? "Stop task" : ""; refresh();
+  };
+
+  // Voice input where the browser supports it.
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null;
+  if (!SR) mic.hidden = true;
+  else mic.onclick = () => {
+    if (rec) { rec.stop(); return; }
+    rec = new SR(); rec.lang = document.documentElement.lang === "bn" ? "bn-BD" : (navigator.language || "en-US"); rec.interimResults = false;
+    rec.onresult = (e) => { const t = e.results[0][0].transcript; input.value += (input.value ? " " : "") + t; input.dispatchEvent(new Event("input")); };
+    rec.onend = rec.onerror = () => { rec = null; mic.classList.remove("on"); };
+    mic.classList.add("on"); rec.start();
+  };
+  return { form, input, send, plus, tag, extras, setSuggestion, setBusy, state };
 }
 
 // ---------- Left: task list grouped by date ----------
@@ -405,31 +552,45 @@ $("#taskSearch").addEventListener("input", renderList);
 // ---------- Right: new task screen ----------
 function showNew() {
   current = null; if (source) source.close();
-  const main = $("#main"); main.className = ""; main.replaceChildren($("#newTpl").content.cloneNode(true));
+  const main = $("#main"); main.className = ""; main.replaceChildren();
+  const chat = h("div", "chat");
+  const top = h("div", "topbar");
+  const left = h("div", "tb-side"); const menuBtn = iconBtn("menu", "Open tasks", "icon-btn mobile-only"); menuBtn.dataset.openSide = ""; left.append(menuBtn);
+  top.append(left, h("div", "title"), h("div", "tb-side right"));
+
+  const welcome = h("div", "welcome"); const col = h("div", "column");
   const hour = new Date().getHours();
-  $("#greeting").textContent = (hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening") + ". What should we build?";
-  $("#modelTag").textContent = config.model;
-  const form = $("#createForm");
-  const repoTag = $("#repoTag");
+  const h1 = h("h1"); h1.append(icon("spark"), h("span", null, (hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening") + ". What should we build?"));
+  const c = buildComposer({ placeholder: "How can NOVA help you today?", withExtras: true });
+  c.input.rows = 2; c.input.required = true;
+  const form = c.form;
   const syncTag = () => {
     const url = form.repo_url.value.trim();
-    repoTag.hidden = !url || form.classList.contains("show-extras");
-    repoTag.textContent = url ? repoName(url) + (form.branch.value.trim() ? " @ " + form.branch.value.trim() : "") : "";
+    c.tag.hidden = !url || form.classList.contains("show-extras");
+    c.tag.textContent = url ? repoName(url) + (form.branch.value.trim() ? " @ " + form.branch.value.trim() : "") : "";
   };
-  $("#extrasBtn").onclick = () => { form.classList.toggle("show-extras"); syncTag(); if (form.classList.contains("show-extras")) form.repo_url.focus(); };
+  c.plus.onclick = () => { form.classList.toggle("show-extras"); syncTag(); if (form.classList.contains("show-extras")) form.repo_url.focus(); };
   form.repo_url.oninput = form.branch.oninput = syncTag;
   const submit = async (e) => {
     e && e.preventDefault();
-    if (!form.prompt.value.trim()) return form.prompt.focus();
+    if (!c.input.value.trim()) return c.input.focus();
     const data = Object.fromEntries(new FormData(form));
     try { const t = await api("/api/tasks", { method: "POST", body: JSON.stringify(data) }); location.hash = t.id; }
     catch (err) { alert(err.message); }
   };
   form.onsubmit = submit;
-  form.prompt.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !isMobile()) submit(e); };
-  for (const b of main.querySelectorAll(".suggestions button")) b.onclick = () => { form.prompt.value = b.dataset.s; form.prompt.dispatchEvent(new Event("input")); form.prompt.focus(); };
-  autosize(form.prompt);
-  if (!isMobile()) form.prompt.focus();
+  c.input.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !isMobile()) submit(e); };
+
+  const sugg = h("div", "suggestions");
+  for (const [ic, labelText, promptText] of [["bug", "Fix a failing test", "Find and fix a failing test"], ["check", "Add validation + tests", "Add input validation and write tests for it"], ["book", "Write a README", "Read this codebase and write a clear README"]]) {
+    const b = h("button"); b.type = "button"; b.append(icon(ic), labelText);
+    b.onclick = () => { c.input.value = promptText; c.input.dispatchEvent(new Event("input")); c.input.focus(); };
+    sugg.append(b);
+  }
+  col.append(h1, form, sugg); welcome.append(col);
+  chat.append(top, welcome); main.append(chat);
+  autosize(c.input);
+  if (!isMobile()) c.input.focus();
   renderList(); refreshList();
 }
 
@@ -441,34 +602,47 @@ async function showTask(id) {
   current = task;
   const main = $("#main"); main.className = ""; main.replaceChildren();
 
-  // Conversation column
+  // Top bar: back | title + subtitle | changes, menu
   const chat = h("div", "chat");
   const top = h("div", "topbar");
-  const openSide = h("button", "icon-btn mobile-only"); openSide.dataset.openSide = ""; openSide.append(icon("menu")); openSide.setAttribute("aria-label", "Open sidebar");
+  const left = h("div", "tb-side");
+  const back = iconBtn("back", "All tasks", "icon-btn mobile-only"); back.dataset.openSide = "";
+  left.append(back);
   const title = h("div", "title"); title.append(h("div", null, task.title));
   const sub = h("small"); title.append(sub);
-  const changesBtn = h("button", "changes-btn"); const count = h("span", "count");
-  changesBtn.append(icon("diff", "i"), h("span", "lbl", "Changes"), count);
-  const delBtn = h("button", "icon-btn"); delBtn.append(icon("trash")); delBtn.title = "Delete task"; delBtn.setAttribute("aria-label", "Delete task");
-  delBtn.onclick = async () => { if (confirm("Delete this task and its workspace?")) { await api("/api/tasks/" + id, { method: "DELETE" }); location.hash = ""; refreshList(); } };
-  top.append(openSide, title, changesBtn, delBtn);
+  const right = h("div", "tb-side right");
+  const changesBtn = h("button", "changes-btn"); changesBtn.type = "button"; changesBtn.title = "Changes";
+  const count = h("span", "count"); const badge = h("span", "badge");
+  changesBtn.append(icon("pr"), h("span", "lbl", "Changes"), count, badge);
+  const menuWrap = h("div", "menu-wrap");
+  const dotsBtn = iconBtn("dots", "More");
+  const dropdown = h("div", "dropdown");
+  const stopItem = h("button"); stopItem.type = "button"; stopItem.append(icon("stop"), "Stop task");
+  const themeItem = h("button"); themeItem.type = "button"; themeItem.append(icon("theme"), "Light / dark");
+  const delItem = h("button", "danger"); delItem.type = "button"; delItem.append(icon("trash"), "Delete task");
+  dropdown.append(stopItem, themeItem, delItem); menuWrap.append(dotsBtn, dropdown);
+  dotsBtn.onclick = () => dropdown.classList.toggle("open");
+  stopItem.onclick = () => { dropdown.classList.remove("open"); api(`/api/tasks/${id}/cancel`, { method: "POST" }); };
+  themeItem.onclick = () => { dropdown.classList.remove("open"); toggleTheme(); };
+  delItem.onclick = async () => { dropdown.classList.remove("open"); if (confirm("Delete this task and its workspace?")) { await api("/api/tasks/" + id, { method: "DELETE" }); location.hash = ""; refreshList(); } };
+  right.append(changesBtn, menuWrap);
+  top.append(left, title, right);
 
   const pane = h("div", "pane");
   const timeline = h("div", "timeline column"); pane.append(timeline);
   const working = h("div", "working"); working.append(icon("spark"), h("span", null, "NOVA is working…"));
 
   const foot = h("div", "followup");
-  const form = h("form", "composer column"); const row = h("div", "row");
-  const input = h("textarea"); input.rows = 1; input.placeholder = "Reply to NOVA…";
-  const send = h("button", "send accent"); send.type = "submit";
-  row.append(input, send); form.append(row); foot.append(form, h("div", "hint", "NOVA works in an isolated sandbox. Review changes before you push."));
+  const c = buildComposer({ placeholder: "Reply to NOVA…", name: "message" });
+  c.plus.onclick = () => { location.hash = ""; };
+  foot.append(c.form);
   chat.append(top, pane, foot);
 
   // Changes panel (right)
   const panel = h("section", "panel"); const inner = h("div", "panel-inner");
   const phead = h("div", "panel-head"); const pttl = h("div", "ttl"); const pstat = h("small", null, "");
   pttl.append(h("b", null, "Changes"), pstat);
-  const closeBtn = h("button", "icon-btn"); closeBtn.append(icon("close")); closeBtn.setAttribute("aria-label", "Close changes");
+  const closeBtn = iconBtn("close", "Close changes");
   phead.append(pttl, closeBtn);
   const pactions = h("div", "panel-actions");
   const commitBtn = h("button", null, "Commit to branch"), pushBtn = h("button", "accent", "Commit & push");
@@ -489,8 +663,10 @@ async function showTask(id) {
     const { files, adds, dels } = diffStats(diff);
     lastFiles = files.length;
     count.replaceChildren(); if (files.length) count.append(h("b", null, "+" + adds), " ", h("i", null, "−" + dels));
+    badge.classList.toggle("has", files.length > 0);
     pstat.textContent = files.length ? `${files.length} file${files.length > 1 ? "s" : ""} changed · +${adds} −${dels}` : "No changes yet";
     commitBtn.disabled = !files.length || busy; pushBtn.disabled = !files.length || busy || !task.repo_url;
+    updateSuggestion();
     if (!main.classList.contains("panel-open")) return;
     pbody.replaceChildren();
     if (!files.length) { pbody.append(h("div", "muted", "NOVA hasn't changed any files yet.")); return; }
@@ -514,40 +690,62 @@ async function showTask(id) {
   const scheduleDiff = () => { clearTimeout(diffTimer); diffTimer = setTimeout(loadDiff, 500); };
   const doCommit = async (push) => {
     const message = prompt("Commit message:", task.title); if (message === null) return;
-    try { const r = await api(`/api/tasks/${id}/commit`, { method: "POST", body: JSON.stringify({ message, push }) }); alert(`Committed ${r.commit.slice(0, 8)} on ${r.branch}${r.pushed ? " and pushed" : ""}`); loadDiff(); }
+    try { const r = await api(`/api/tasks/${id}/commit`, { method: "POST", body: JSON.stringify({ message, push }) }); toast(`Committed ${r.commit.slice(0, 8)}${r.pushed ? " and pushed" : ""}`); loadDiff(); }
     catch (err) { alert(err.message); }
   };
   commitBtn.onclick = () => doCommit(false); pushBtn.onclick = () => doCommit(true);
 
-  form.onsubmit = async (e) => {
+  // A context-aware suggestion inside the composer, like "Commit & push these changes ›".
+  function updateSuggestion() {
+    if (busy) return c.setSuggestion(null);
+    if (task.status === "failed") return c.setSuggestion("Try again", () => { c.input.value = "Please try again."; c.input.dispatchEvent(new Event("input")); c.input.focus(); });
+    if (lastFiles) return c.setSuggestion(task.repo_url ? "Commit & push these changes" : "Commit these changes", () => doCommit(!!task.repo_url));
+    c.setSuggestion(null);
+  }
+
+  c.form.onsubmit = async (e) => {
     e.preventDefault();
     if (busy) { await api(`/api/tasks/${id}/cancel`, { method: "POST" }); return; }
-    if (!input.value.trim()) return;
-    try { await api(`/api/tasks/${id}/messages`, { method: "POST", body: JSON.stringify({ message: input.value }) }); input.value = ""; input.dispatchEvent(new Event("input")); }
+    if (!c.input.value.trim()) return;
+    try { await api(`/api/tasks/${id}/messages`, { method: "POST", body: JSON.stringify({ message: c.input.value }) }); c.input.value = ""; c.input.dispatchEvent(new Event("input")); }
     catch (err) { alert(err.message); }
   };
-  input.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !isMobile()) { e.preventDefault(); if (!busy) form.requestSubmit(); } };
-  autosize(input);
+  c.input.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !isMobile()) { e.preventDefault(); if (!busy) c.form.requestSubmit(); } };
+  autosize(c.input);
 
   const setStatus = (status) => {
     task.status = status;
-    sub.replaceChildren(h("span", "dot " + status), h("span", null, status));
-    if (task.repo_url) sub.append(h("span", null, "· " + repoName(task.repo_url) + (task.branch ? " @ " + task.branch : "")));
+    sub.replaceChildren();
+    if (task.repo_url) sub.append(h("span", null, repoName(task.repo_url) + (task.branch ? " @ " + task.branch : "")), h("span", null, "·"));
+    sub.append(h("span", "dot " + status), h("span", null, status));
     busy = status === "running" || status === "queued";
-    send.replaceChildren(icon(busy ? "stop" : "arrow"));
-    send.setAttribute("aria-label", busy ? "Stop" : "Send"); send.title = busy ? "Stop task" : "";
+    c.setBusy(busy); stopItem.disabled = !busy;
     if (busy) timeline.append(working); else working.remove();
+    updateSuggestion();
   };
   setStatus(task.status);
   loadDiff();
 
   // Replay the full log over SSE; it keeps streaming new events live.
-  let live = null, liveKind = null, replaying = true;
+  let live = null, liveKind = null, replaying = true, lastMsg = null;
   const toolEls = {};
   const add = (el) => { timeline.insertBefore(el, working.parentNode === timeline ? working : null); };
   const stick = () => { if (pane.scrollHeight - pane.scrollTop - pane.clientHeight < 240) pane.scrollTop = pane.scrollHeight; };
   const endLive = () => { if (live) { live.remove(); live = null; liveKind = null; } };
-  const msgEl = (text) => { const el = h("div", "ev-msg"); el.innerHTML = markdown(text); return el; };
+  const addActions = (msgEl) => {
+    if (!msgEl || msgEl.querySelector(".msg-actions")) return;
+    const row = h("div", "msg-actions");
+    const copy = iconBtn("copy", "Copy"); copy.onclick = () => copyText(msgEl.dataset.raw, copy); row.append(copy);
+    if ("speechSynthesis" in window) {
+      const play = iconBtn("play", "Read aloud");
+      play.onclick = () => {
+        if (speechSynthesis.speaking) { speechSynthesis.cancel(); return; }
+        speechSynthesis.speak(new SpeechSynthesisUtterance(msgEl.dataset.raw.replace(/[`*#]/g, "")));
+      };
+      row.append(play);
+    }
+    msgEl.append(row);
+  };
   setTimeout(() => { replaying = false; pane.scrollTop = pane.scrollHeight; }, 400);
 
   const q = token ? `&token=${encodeURIComponent(token)}` : "";
@@ -562,32 +760,44 @@ async function showTask(id) {
       }
       case "user": endLive(); add(h("div", "ev-user", d.text)); break;
       case "thinking": endLive(); add(h("div", "ev-think", d.text)); break;
-      case "message": endLive(); add(msgEl(d.text)); break;
+      case "message": { endLive(); const el = renderMarkdown(d.text); el.dataset.raw = d.text; lastMsg = el; add(el); break; }
       case "log": add(h("div", "ev-log", d.text)); break;
       case "tool_call": {
         endLive();
-        const det = h("details", "tool"); const sum = h("summary");
-        const isBash = d.name === "bash";
-        const label = isBash ? "Run" : ({ view: "Read", create: "Write", str_replace: "Edit", insert: "Edit" }[d.input.command] || "Edit");
-        const body = isBash ? (d.input.restart ? "restart shell" : d.input.command) : (d.input.path || "");
-        sum.append(h("span", "k", label), h("span", "c", body), h("span", "chev", "›")); det.append(sum);
-        if (!isBash && (d.input.old_str != null || d.input.file_text != null || d.input.insert_text != null)) {
-          det.append(h("pre", null, d.input.file_text ?? d.input.insert_text ?? `- ${d.input.old_str}\n+ ${d.input.new_str ?? ""}`));
+        let el;
+        if (d.name === "bash") {
+          el = codeCard("Bash", d.input.restart ? "# restart shell" : d.input.command, { shell: true });
+        } else {
+          const verb = { view: "Read", create: "Write", str_replace: "Edit", insert: "Edit" }[d.input.command] || "Edit";
+          const path = d.input.path || "";
+          if (verb === "Read") {
+            el = h("div", "tool-line"); const code = h("code", null, path);
+            el.append(icon("file"), h("span", null, "Read"), code);
+          } else {
+            const body = d.input.file_text ?? d.input.insert_text ?? `- ${d.input.old_str ?? ""}\n+ ${d.input.new_str ?? ""}`;
+            const lbl = document.createDocumentFragment(); lbl.append(verb + " · ", h("b", null, path.split("/").pop()));
+            el = codeCard("", body, { labelNode: lbl });
+          }
         }
-        det.dataset.readOnly = String(label === "Read");
-        toolEls[d.id] = det; add(det); break;
+        toolEls[d.id] = el; add(el); break;
       }
       case "tool_result": {
-        const det = toolEls[d.id]; if (!det) break;
-        if (d.is_error) det.classList.add("err");
-        det.append(h("pre", null, d.output));
-        // Anything but a file read may have changed the workspace.
-        if (!replaying && det.dataset.readOnly !== "true") scheduleDiff();
+        const el = toolEls[d.id]; if (!el) break;
+        if (el.classList.contains("tool-line")) { if (d.is_error) { el.classList.add("err"); el.title = d.output; } }
+        else {
+          const out = h("details", "cc-out" + (d.is_error ? " err" : ""));
+          const exit = /\[exit code (\d+)\]\s*$/.exec(d.output);
+          out.append(h("summary", null, d.is_error ? "Error" : exit ? `Output · exit ${exit[1]}` : "Output"), h("pre", null, d.output));
+          if (d.is_error) out.open = true;
+          el.append(out);
+        }
+        if (!replaying && !el.classList.contains("tool-line")) scheduleDiff();
         break;
       }
       case "status":
         endLive(); setStatus(d.status);
         if (d.status === "completed") {
+          addActions(lastMsg);
           const s = h("div", "ev-status completed"); s.append(icon("check", "i"), h("span", null, "Task completed"));
           const view = h("button", null, "View changes"); view.onclick = () => setPanel(true); s.append(view); add(s);
           const wasLive = !replaying;
@@ -605,7 +815,10 @@ async function showTask(id) {
 function route() { app.classList.remove("side-open"); const id = location.hash.slice(1); id ? showTask(id) : showNew(); }
 window.addEventListener("hashchange", route);
 $("#newBtn").onclick = () => { if (location.hash) location.hash = ""; else route(); };
-api("/api/config").then((c) => { config = c; $("#cfg").textContent = `${c.model} · ${c.sandbox} sandbox`; const tag = $("#modelTag"); if (tag) tag.textContent = c.model; }).catch(() => {});
+api("/api/config").then((c) => {
+  config = c; $("#cfg").textContent = `${c.model} · ${c.sandbox} sandbox`;
+  document.querySelectorAll("[data-model]").forEach((el) => { el.textContent = prettyModel(c.model); });
+}).catch(() => {});
 route();
 setInterval(refreshList, 10000);
 </script>
