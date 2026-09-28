@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#262624" media="(prefers-color-scheme: dark)">
 <title>NOVA Cloud Agent</title>
@@ -87,7 +87,7 @@
   .profile .who small { color: var(--muted); font-size: 12px; display: block; overflow: hidden; text-overflow: ellipsis; }
 
   /* Collapsed rail (desktop only) */
-  @media (min-width: 761px) {
+  @media (min-width: 769px) {
     .app.collapsed aside { width: 60px; }
     .app.collapsed .side-top { flex-direction: column; gap: 8px; padding: 12px 0 8px; }
     .app.collapsed .brand b, .app.collapsed .nav-item .lbl, .app.collapsed .search input,
@@ -260,22 +260,102 @@
     main.panel-open .panel { position: fixed; inset: 0; width: 100%; z-index: 6; border-left: 0; }
     .panel-inner { width: 100%; }
   }
-  @media (max-width: 760px) {
+  /* ---------- Mobile (≤ 768px): sized to match the Claude mobile app ---------- */
+  @media (max-width: 768px) {
+    html, body { width: 100%; overflow-x: hidden; }
+    /* --app-h follows the visual viewport, so the composer stays above the keyboard. */
+    .app { width: 100vw; max-width: 100%; height: var(--app-h, 100dvh); min-height: 0; }
     aside { position: fixed; inset: 0 auto 0 0; width: min(300px, 86vw); z-index: 8; transform: translateX(-100%); transition: transform .2s ease; box-shadow: var(--shadow); }
     .app.side-open aside { transform: none; }
     .app.side-open .scrim { display: block; position: fixed; inset: 0; background: rgba(0, 0, 0, .32); z-index: 7; }
     .desk-only { display: none !important; }
     .mobile-only { display: inline-grid !important; }
-    .topbar { grid-template-columns: 88px minmax(0, 1fr) 88px; padding: 8px 6px; }
+    main, .chat { min-width: 0; width: 100%; }
+
+    /* Top bar: 60px, back left, centred title/subtitle, two icons right */
+    .topbar { grid-template-columns: 80px minmax(0, 1fr) 80px; padding: env(safe-area-inset-top) 2px 0 4px; min-height: calc(60px + env(safe-area-inset-top)); flex: none; }
+    .tb-side { gap: 0; }
+    .tb-side .icon-btn, .changes-btn { width: 36px; height: 36px; }
+    .tb-side .icon-btn:first-child[data-open-side] { width: 40px; height: 40px; }
+    .tb-side .icon-btn svg { width: 20px; height: 20px; }
+    .topbar .title { line-height: 1.25; }
+    .topbar .title div { font-size: 15px; font-weight: 600; }
+    .topbar .title small { font-size: 12.5px; gap: 5px; margin-top: 1px; }
+    .topbar .title small .dot { width: 6px; height: 6px; }
     .changes-btn .lbl, .changes-btn .count { display: none; }
     .changes-btn .badge.has { display: block; }
-    .changes-btn { width: 42px; height: 42px; padding: 0; justify-content: center; }
-    .pane { padding-left: 18px; padding-right: 18px; }
-    .followup { padding-left: 12px; padding-right: 12px; }
-    .ev-msg { font-size: 17px; }
-    .welcome { padding-bottom: 8vh; }
-    .welcome h1 { flex-direction: column; gap: 10px; }
-    .chip, .chip.branch { flex: 1 1 100%; }
+    .changes-btn { padding: 0; justify-content: center; }
+    .changes-btn .badge { top: 4px; right: 4px; }
+    .dropdown { top: 38px; }
+
+    /* Conversation: flows from the top, 20px side padding, app-like type */
+    .pane { padding: 4px 20px 12px; }
+    .timeline { gap: 14px; }
+    .ev-user { font-size: 16px; line-height: 1.4; padding: 9px 14px; border-radius: 20px; max-width: 88%; }
+    .ev-msg { font-size: 16px; line-height: 1.35; }
+    .ev-msg p { margin: 0 0 8px; }
+    .ev-msg ul, .ev-msg ol { margin: 0 0 8px; padding-left: 1.25em; }
+    .ev-msg li { margin: 3px 0; padding-left: .1em; }
+    .ev-msg :not(pre) > code { font-size: .84em; padding: 1px 5px; }
+    .ev-msg h3 { font-size: 1.08em; margin: .5em 0 .25em; }
+    .ev-msg > .codecard { margin: 2px 0 10px; }
+    .ev-think { font-size: 13.5px; line-height: 1.4; }
+    .ev-log { font-size: 12.5px; }
+    .ev-status { font-size: 13.5px; }
+    .ev-status button { font-size: 12.5px; padding: 3px 11px; }
+    .working { font-size: 13.5px; }
+    .working svg { width: 20px; height: 20px; }
+    .msg-actions { margin: 6px 0 0 -8px; gap: 0; }
+    .msg-actions button { width: 32px; height: 32px; }
+    .msg-actions button svg { width: 17px; height: 17px; }
+
+    /* Code cards: 16px radius, 40px header, 11.5px code */
+    .codecard { border-radius: 16px; }
+    .cc-head { padding: 0 6px 0 16px; height: 40px; background: color-mix(in srgb, var(--text) 3%, var(--soft)); }
+    .cc-label { font-family: var(--mono); font-size: 12.5px; }
+    .cc-head button { width: 32px; height: 32px; }
+    .cc-head button svg { width: 16px; height: 16px; }
+    .cc-body { padding: 16px 16px 17px; font-size: 11.5px; line-height: 1.12; max-height: 300px; }
+    details.cc-out summary { padding: 7px 16px; font-size: 12.5px; }
+    details.cc-out pre { padding: 0 16px 12px; font-size: 11.5px; line-height: 1.35; }
+    .tool-line { font-size: 13.5px; }
+    .tool-line code { font-size: 12px; }
+
+    /* Composer: 16px side margins, 28px radius, ~94px tall, 36px controls */
+    .followup { padding: 6px 16px max(14px, calc(env(safe-area-inset-bottom) + 6px)); flex: none; }
+    .composer, .followup .composer { width: 100%; max-width: 100%; border-radius: 28px; padding: 12px 8px 8px; position: relative; box-shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 2px 10px rgba(0, 0, 0, .05); }
+    .composer textarea { font-size: 16px; line-height: 24px; min-height: 24px; padding: 0 8px; }
+    .welcome .composer textarea { min-height: 24px; }
+    /* The suggestion sits on the input line, like a placeholder, until you type. */
+    .suggest { position: absolute; top: 12px; left: 16px; right: 16px; height: 24px; margin: 0; gap: 8px; pointer-events: none; }
+    .suggest .s-text { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .suggest button { pointer-events: auto; width: 28px; height: 20px; flex: none; }
+    .suggest button svg { width: 12px; height: 12px; }
+    .composer:has(.suggest.show) textarea::placeholder { color: transparent; }
+    .composer:has(textarea:not(:placeholder-shown)) .suggest { display: none; }
+    .composer .bar { margin-top: 14px; gap: 8px; }
+    .composer .extras { margin-top: 10px; padding: 0 2px; gap: 6px; }
+    .round { width: 36px; height: 36px; }
+    .round svg { width: 18px; height: 18px; }
+    .plus-btn { border: 0; background: var(--soft); color: var(--text); }
+    .plus-btn:hover { background: var(--hover); }
+    .model-pill { height: 36px; padding: 0 12px; font-size: 13px; }
+    .mic svg { width: 18px; height: 18px; }
+    .chip, .chip.branch { flex: 1 1 100%; padding: 5px 12px; }
+    .chip input { font-size: 16px; }
+    .repo-tag { font-size: 12px; padding: 3px 10px; max-width: 40%; }
+
+    /* New task: compact greeting at the top, composer at the bottom */
+    .welcome { justify-content: flex-start; padding: 20px 16px max(14px, calc(env(safe-area-inset-bottom) + 6px)); }
+    .welcome > .column { display: flex; flex-direction: column; flex: 1 0 auto; }
+    .welcome h1 { flex-direction: row; gap: 10px; font-size: 24px; line-height: 1.25; margin: 8px 4px 14px; justify-content: flex-start; text-align: left; }
+    .welcome h1 svg { width: 26px; height: 26px; }
+    .suggestions { order: 2; justify-content: flex-start; gap: 6px; margin: 0 4px 16px; }
+    .suggestions button { font-size: 12.5px; padding: 5px 11px; gap: 5px; }
+    .suggestions button svg { width: 13px; height: 13px; }
+    .welcome .composer { order: 3; margin-top: auto; }
+
+    .toast { bottom: calc(118px + env(safe-area-inset-bottom)); }
   }
 </style>
 </head>
@@ -342,9 +422,22 @@ const iconBtn = (id, label, cls = "icon-btn") => { const b = h("button", cls); b
 const span = (cls, text) => h("span", cls, text);
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
 const app = $("#app");
-const isMobile = () => matchMedia("(max-width: 760px)").matches;
+const isMobile = () => matchMedia("(max-width: 768px)").matches;
 
 function toast(text) { const t = $("#toast"); t.textContent = text; t.classList.add("show"); clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove("show"), 1600); }
+
+// Phones: size the app to the visible viewport so the on-screen keyboard
+// never covers the composer (iOS keeps the layout viewport full height).
+if (window.visualViewport) {
+  const fit = () => {
+    if (!isMobile()) { document.documentElement.style.removeProperty("--app-h"); return; }
+    document.documentElement.style.setProperty("--app-h", visualViewport.height + "px");
+    if (window.scrollY) window.scrollTo(0, 0);
+  };
+  visualViewport.addEventListener("resize", fit);
+  visualViewport.addEventListener("scroll", fit);
+  fit();
+}
 
 // Theme: follow the system unless the viewer picked one.
 const savedTheme = store.get("nova-theme");
@@ -579,7 +672,7 @@ function showNew() {
   const hour = new Date().getHours();
   const h1 = h("h1"); h1.append(icon("spark"), h("span", null, (hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening") + ". What should we build?"));
   const c = buildComposer({ placeholder: "How can NOVA help you today?", withExtras: true });
-  c.input.rows = 2; c.input.required = true;
+  c.input.rows = isMobile() ? 1 : 2; c.input.required = true;
   const form = c.form;
   const syncTag = () => {
     const url = form.repo_url.value.trim();
