@@ -65,7 +65,7 @@ def test_task_lifecycle_diff_follow_up_and_commit(tmp_path):
         assert "text_delta" in {e["type"] for e in events}  # live stream includes deltas
 
         commit = client.post(f"/api/tasks/{task_id}/commit", json={"message": "Add README"}).json()
-        assert commit["branch"] == f"nova/{task_id}"
+        assert commit["branch"] == f"allfixx/{task_id}"
         assert client.post(f"/api/tasks/{task_id}/commit", json={}).status_code == 409  # nothing left
 
         assert [t["id"] for t in client.get("/api/tasks").json()] == [task_id]

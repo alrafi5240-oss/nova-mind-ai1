@@ -1,4 +1,4 @@
-# NOVA Cloud Agent
+# Allfixx Code
 
 An autonomous coding agent in the style of Codex / Claude Code on the web. You
 give it a task and (optionally) a Git repository; it clones the repo into an
@@ -29,7 +29,7 @@ Browser UI ──REST/SSE──▶ FastAPI server ──▶ TaskManager (thread 
 4. Every step (thinking summary, message, command, output) is logged as an event
    and streamed live to the UI over Server-Sent Events.
 5. You review the diff, send follow-up messages (the same conversation continues),
-   then commit to `nova/<task-id>` and optionally push.
+   then commit to `allfixx/<task-id>` and optionally push.
 
 ## Quick start
 
@@ -50,8 +50,8 @@ NOVA_SANDBOX=local python -m nova_agent
 ### Run on your Mac (one command)
 
 ```bash
-git clone https://github.com/alrafi5240-oss/nova-mind-ai1.git nova-agent
-cd nova-agent
+git clone https://github.com/alrafi5240-oss/nova-mind-ai1.git allfixx-code
+cd allfixx-code
 ./run-mac.sh
 ```
 
@@ -62,13 +62,13 @@ it straight away. It needs Python 3.10+ (`brew install python@3.12`) and git
 (`xcode-select --install`). If Docker Desktop is running, each task gets an
 isolated container; otherwise commands run directly on your Mac.
 
-- `./run-mac.sh --phone` also serves NOVA on your Wi-Fi, protected by an
+- `./run-mac.sh --phone` also serves Allfixx Code on your Wi-Fi, protected by an
   access token. Click the phone icon at the bottom of the sidebar to copy a
   link that signs your phone in.
 - `./run-mac.sh --port=9000` uses another port if 8787 is taken.
 
 > **বাংলায়:** Mac-এর Terminal-এ উপরের ৩টা কমান্ড চালান। প্রথমবার API key চাইবে,
-> তারপর ব্রাউজারে NOVA খুলে যাবে (http://127.0.0.1:8787)। ফোন থেকে দেখতে
+> তারপর ব্রাউজারে Allfixx Code খুলে যাবে (http://127.0.0.1:8787)। ফোন থেকে দেখতে
 > `./run-mac.sh --phone` চালান, তারপর sidebar-এর নিচের 📱 বোতাম থেকে লিংক কপি করে
 > ফোনে খুলুন (ফোন আর Mac একই Wi-Fi-তে থাকতে হবে)।
 
@@ -77,13 +77,13 @@ isolated container; otherwise commands run directly on your Mac.
 On a fresh Ubuntu/Debian server with ports 80/443 open:
 
 ```bash
-git clone https://github.com/alrafi5240-oss/nova-mind-ai1.git nova-agent
-cd nova-agent
+git clone https://github.com/alrafi5240-oss/nova-mind-ai1.git allfixx-code
+cd allfixx-code
 sudo bash deploy/install.sh
 ```
 
 The script installs Docker if needed, asks for your Anthropic API key and an
-optional domain, generates an access token, and starts NOVA behind Caddy
+optional domain, generates an access token, and starts Allfixx Code behind Caddy
 (automatic HTTPS when you give a domain). It prints the URL and token at the
 end. Open the URL on your phone and paste the token when asked. Settings live
 in `deploy/.env`; update with `git pull && sudo bash deploy/install.sh`.
@@ -98,12 +98,12 @@ the data directory must have the **same path** inside the server container and
 on the host (the daemon resolves bind-mount paths on the host):
 
 ```bash
-docker build -t nova-agent .
+docker build -t allfixx-code .
 docker run -d -p 8787:8787 \
   -e ANTHROPIC_API_KEY -e NOVA_AGENT_TOKEN=change-me \
   -e NOVA_DATA_DIR=/srv/nova -v /srv/nova:/srv/nova \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  nova-agent
+  allfixx-code
 ```
 
 ## Configuration
@@ -133,7 +133,7 @@ All settings are environment variables; see [`.env.example`](.env.example).
 | `POST` | `/api/tasks/{id}/messages` | `{"message"}` – follow-up on a finished task |
 | `POST` | `/api/tasks/{id}/cancel` | Stop a running task |
 | `GET` | `/api/tasks/{id}/diff` | Current `git diff` of the workspace |
-| `POST` | `/api/tasks/{id}/commit` | `{"message"?, "push"?}` – commit to `nova/<id>`, optionally push |
+| `POST` | `/api/tasks/{id}/commit` | `{"message"?, "push"?}` – commit to `allfixx/<id>`, optionally push |
 | `DELETE` | `/api/tasks/{id}` | Delete task and workspace |
 
 ## Security notes

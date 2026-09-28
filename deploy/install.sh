@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Install or update NOVA Cloud Agent on a fresh Ubuntu/Debian VPS.
+# Install or update Allfixx Code on a fresh Ubuntu/Debian VPS.
 #
-#   git clone <this repo> nova-agent && cd nova-agent
+#   git clone <this repo> allfixx-code && cd allfixx-code
 #   sudo bash deploy/install.sh
 #
 # Re-running it pulls nothing by itself; run `git pull` first to update.
@@ -45,7 +45,7 @@ fi
 mkdir -p /srv/nova
 echo "==> Pulling the sandbox image"
 docker pull "$(grep -E '^NOVA_DOCKER_IMAGE=' .env | cut -d= -f2- || echo python:3.11)"
-echo "==> Building and starting NOVA"
+echo "==> Building and starting Allfixx Code"
 docker compose up -d --build
 
 site="$(grep -E '^NOVA_SITE=' .env | cut -d= -f2-)"
@@ -55,6 +55,6 @@ else
   url="https://$site"
 fi
 echo
-echo "NOVA is running at: $url"
+echo "Allfixx Code is running at: $url"
 echo "Access token:       $(grep -E '^NOVA_AGENT_TOKEN=' .env | cut -d= -f2-)"
 echo "Logs:               cd $DEPLOY_DIR && docker compose logs -f nova"

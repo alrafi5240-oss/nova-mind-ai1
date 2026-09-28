@@ -4,7 +4,8 @@ Guidance for AI assistants working in the `nova-mind-ai1` repository.
 
 ## What this repository is
 
-**NOVA Cloud Agent** — an autonomous, Codex-style coding agent. A user submits a
+**Allfixx Code** (formerly NOVA Cloud Agent; the package, `NOVA_*` settings and
+Docker names keep the old prefix) — an autonomous, Codex-style coding agent. A user submits a
 task (plus an optional Git repo); the agent works in an isolated Docker sandbox
 using Claude with the Anthropic-defined `bash` and `text_editor` tools, and
 returns a reviewable diff. It is separate from the NOVA MIND chat product in

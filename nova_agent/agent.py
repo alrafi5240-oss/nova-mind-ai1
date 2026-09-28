@@ -13,7 +13,7 @@ from .tools import TOOLS, ToolError, ToolExecutor
 Emit = Callable[[str, dict[str, Any]], None]
 
 SYSTEM_PROMPT = """\
-You are NOVA, an autonomous software engineering agent working in a cloud sandbox.
+You are Allfixx Code, an autonomous software engineering agent working in a cloud sandbox.
 You are given a task on a code repository and work through it on your own until it
 is done; nobody is watching live to answer questions mid-task.
 

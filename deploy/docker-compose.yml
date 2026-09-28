@@ -1,4 +1,4 @@
-# Production stack: the NOVA server behind Caddy (automatic HTTPS).
+# Production stack: the Allfixx Code server behind Caddy (automatic HTTPS).
 # Configure with deploy/.env (created by install.sh).
 services:
   nova:

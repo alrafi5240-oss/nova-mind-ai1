@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#262624" media="(prefers-color-scheme: dark)">
-<title>NOVA Cloud Agent</title>
+<title>Allfixx Code</title>
 <link rel="icon" href="data:,">
 <style>
   :root {
@@ -392,7 +392,7 @@
 <div class="app" id="app">
   <aside id="sidebar">
     <div class="side-top">
-      <div class="brand"><svg class="mark"><use href="#spark"/></svg><b>NOVA</b></div>
+      <div class="brand"><svg class="mark"><use href="#spark"/></svg><b>Allfixx Code</b></div>
       <button class="icon-btn desk-only" id="collapseBtn" title="Toggle sidebar" aria-label="Toggle sidebar"><svg><use href="#i-sidebar"/></svg></button>
       <button class="icon-btn mobile-only" data-close-side aria-label="Close sidebar"><svg><use href="#close"/></svg></button>
     </div>
@@ -402,8 +402,8 @@
     </div>
     <div class="task-list" id="taskList"></div>
     <div class="profile">
-      <div class="avatar">N</div>
-      <div class="who"><b>NOVA workspace</b><small id="cfg">cloud coding agent</small></div>
+      <div class="avatar">A</div>
+      <div class="who"><b>Allfixx workspace</b><small id="cfg">cloud coding agent</small></div>
       <button class="icon-btn theme" id="phoneBtn" title="Open on your phone" aria-label="Open on your phone"><svg><use href="#phone"/></svg></button>
       <button class="icon-btn theme" id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme"><svg><use href="#theme"/></svg></button>
     </div>
@@ -472,7 +472,7 @@ let current = null, source = null, config = { model: "", sandbox: "" }, allTasks
 async function api(path, opts = {}) {
   const res = await fetch(path, { ...opts, headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}) } });
   if (res.status === 401) {
-    token = prompt("This NOVA server needs an access token:") || "";
+    token = prompt("This Allfixx Code server needs an access token:") || "";
     store.set("nova-token", token);
     if (!token) throw new Error("access token required");
     return api(path, opts);
@@ -482,7 +482,7 @@ async function api(path, opts = {}) {
 }
 
 const repoName = (url) => url.replace(/^https:\/\/(www\.)?github\.com\//, "").replace(/\.git$/, "").split("/").pop();
-const prettyModel = (m) => { const x = /^claude-([a-z]+)-(\d+)(?:-(\d+))?/.exec(m || ""); return x ? x[1][0].toUpperCase() + x[1].slice(1) + " " + x[2] + (x[3] ? "." + x[3] : "") : (m || "NOVA"); };
+const prettyModel = (m) => { const x = /^claude-([a-z]+)-(\d+)(?:-(\d+))?/.exec(m || ""); return x ? x[1][0].toUpperCase() + x[1].slice(1) + " " + x[2] + (x[3] ? "." + x[3] : "") : (m || "Allfixx Code"); };
 
 async function copyText(text, btn) {
   try { await navigator.clipboard.writeText(text); } catch {
@@ -671,7 +671,7 @@ function showNew() {
   const welcome = h("div", "welcome"); const col = h("div", "column");
   const hour = new Date().getHours();
   const h1 = h("h1"); h1.append(icon("spark"), h("span", null, (hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening") + ". What should we build?"));
-  const c = buildComposer({ placeholder: "How can NOVA help you today?", withExtras: true });
+  const c = buildComposer({ placeholder: "How can Allfixx Code help you today?", withExtras: true });
   c.input.rows = isMobile() ? 1 : 2; c.input.required = true;
   const form = c.form;
   const syncTag = () => {
@@ -740,10 +740,10 @@ async function showTask(id) {
 
   const pane = h("div", "pane");
   const timeline = h("div", "timeline column"); pane.append(timeline);
-  const working = h("div", "working"); working.append(icon("spark"), h("span", null, "NOVA is working…"));
+  const working = h("div", "working"); working.append(icon("spark"), h("span", null, "Allfixx Code is working…"));
 
   const foot = h("div", "followup");
-  const c = buildComposer({ placeholder: "Reply to NOVA…", name: "message" });
+  const c = buildComposer({ placeholder: "Reply to Allfixx Code…", name: "message" });
   c.plus.onclick = () => { location.hash = ""; };
   foot.append(c.form);
   chat.append(top, pane, foot);
@@ -779,7 +779,7 @@ async function showTask(id) {
     updateSuggestion();
     if (!main.classList.contains("panel-open")) return;
     pbody.replaceChildren();
-    if (!files.length) { pbody.append(h("div", "muted", "NOVA hasn't changed any files yet.")); return; }
+    if (!files.length) { pbody.append(h("div", "muted", "Allfixx Code hasn't changed any files yet.")); return; }
     for (const chunk of files) {
       const lines = chunk.split("\n");
       const m = /^diff --git a\/(.*) b\/(.*)$/.exec(lines[0]);
@@ -942,7 +942,7 @@ function showPhone() {
     modal.append(url, row);
     if (token) modal.append(h("p", null, "The link signs your phone in automatically. Share it only with your own devices."));
   } else {
-    modal.append(h("p", null, "Phone access is off: NOVA only listens on this computer. Stop it (Ctrl+C in the terminal) and start it again with:"));
+    modal.append(h("p", null, "Phone access is off: Allfixx Code only listens on this computer. Stop it (Ctrl+C in the terminal) and start it again with:"));
     modal.append(codeCard("Bash", "./run-mac.sh --phone", { shell: true }));
     modal.append(h("p", null, "It prints an address like http://192.168.1.20:8787 and protects it with an access token."));
   }

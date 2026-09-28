@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Run NOVA on your Mac (also works on Linux).
+# Run Allfixx Code on your Mac (also works on Linux).
 #
-#   ./run-mac.sh            open NOVA at http://127.0.0.1:8787 on this Mac
+#   ./run-mac.sh            open Allfixx Code at http://127.0.0.1:8787 on this Mac
 #   ./run-mac.sh --phone    also allow phones on the same Wi-Fi (creates an access token)
 #   ./run-mac.sh --port=9000
 #
@@ -32,7 +32,7 @@ for candidate in python3.13 python3.12 python3.11 python3.10 python3; do
   fi
 done
 if [[ -z "$PY" ]]; then
-  echo "NOVA needs Python 3.10 or newer (macOS ships 3.9)."
+  echo "Allfixx Code needs Python 3.10 or newer (macOS ships 3.9)."
   echo "Install it with Homebrew (https://brew.sh):  brew install python@3.12"
   exit 1
 fi
@@ -71,7 +71,7 @@ if ! env_has NOVA_SANDBOX && [[ -z "${NOVA_SANDBOX:-}" ]]; then
     export NOVA_SANDBOX=docker
   else
     export NOVA_SANDBOX=local
-    say "Docker Desktop is not running: NOVA will run commands directly on this Mac."
+    say "Docker Desktop is not running: Allfixx Code will run commands directly on this Mac."
     echo "    Only give it tasks you trust, or start Docker Desktop and re-run for isolation."
   fi
 fi

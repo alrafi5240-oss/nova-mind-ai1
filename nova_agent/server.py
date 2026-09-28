@@ -48,7 +48,7 @@ def create_app(
         yield
         app.state.manager.shutdown()
 
-    app = FastAPI(title="NOVA Cloud Agent", lifespan=lifespan)
+    app = FastAPI(title="Allfixx Code", lifespan=lifespan)
 
     def auth(request: Request) -> None:
         if not config.api_token:
@@ -208,7 +208,7 @@ def main() -> None:
 
     import uvicorn
 
-    parser = argparse.ArgumentParser(description="Run the NOVA cloud agent server")
+    parser = argparse.ArgumentParser(description="Run the Allfixx Code agent server")
     parser.add_argument("--host", default="127.0.0.1", help="use 0.0.0.0 to allow phones on your Wi-Fi")
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--open", action="store_true", help="open the web UI in your browser")
@@ -233,7 +233,7 @@ def main() -> None:
         ip = lan_ip()
         lan_url = f"http://{ip}:{args.port}" if ip else None
 
-    print(f"\n  NOVA is running at {local_url}")
+    print(f"\n  Allfixx Code is running at {local_url}")
     if lan_url:
         print(f"  On your phone (same Wi-Fi): {lan_url}")
     print("  Press Ctrl+C to stop.\n")

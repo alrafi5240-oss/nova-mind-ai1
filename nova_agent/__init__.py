@@ -1,1 +1,1 @@
-"""NOVA Cloud Agent - an autonomous coding agent that works in a sandbox."""
+"""Allfixx Code - an autonomous coding agent that works in a sandbox."""

@@ -202,13 +202,13 @@ class TaskManager:
         if task.status in ACTIVE:
             raise ValueError("task is still running")
         ws = self.workspace(task)
-        branch = f"nova/{task.id}"
+        branch = f"allfixx/{task.id}"
         git(ws, "checkout", "-B", branch)
         git(ws, "add", "--all")
         if not git(ws, "status", "--porcelain").strip():
             raise ValueError("there are no changes to commit")
         git(
-            ws, "-c", "user.name=NOVA Agent", "-c", "user.email=nova-agent@localhost",
+            ws, "-c", "user.name=Allfixx Code", "-c", "user.email=allfixx-code@localhost",
             "commit", "-m", (message or task.title).strip() or task.title,
         )
         sha = git(ws, "rev-parse", "HEAD").strip()
@@ -278,7 +278,7 @@ class TaskManager:
             ws.mkdir(parents=True)
             git(ws, "init", "-q")
             git(
-                ws, "-c", "user.name=NOVA Agent", "-c", "user.email=nova-agent@localhost",
+                ws, "-c", "user.name=Allfixx Code", "-c", "user.email=allfixx-code@localhost",
                 "commit", "-q", "--allow-empty", "-m", "Empty workspace",
             )
 
