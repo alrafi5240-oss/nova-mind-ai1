@@ -47,6 +47,31 @@ development without Docker you can run commands directly on your machine —
 NOVA_SANDBOX=local python -m nova_agent
 ```
 
+### Run on your Mac (one command)
+
+```bash
+git clone https://github.com/alrafi5240-oss/nova-mind-ai1.git nova-agent
+cd nova-agent
+./run-mac.sh
+```
+
+The first run creates a Python environment in `.venv`, installs dependencies,
+asks for your Anthropic API key (saved to `.env`, readable only by you) and
+opens http://127.0.0.1:8787 in your browser. After that, `./run-mac.sh` starts
+it straight away. It needs Python 3.10+ (`brew install python@3.12`) and git
+(`xcode-select --install`). If Docker Desktop is running, each task gets an
+isolated container; otherwise commands run directly on your Mac.
+
+- `./run-mac.sh --phone` also serves NOVA on your Wi-Fi, protected by an
+  access token. Click the phone icon at the bottom of the sidebar to copy a
+  link that signs your phone in.
+- `./run-mac.sh --port=9000` uses another port if 8787 is taken.
+
+> **বাংলায়:** Mac-এর Terminal-এ উপরের ৩টা কমান্ড চালান। প্রথমবার API key চাইবে,
+> তারপর ব্রাউজারে NOVA খুলে যাবে (http://127.0.0.1:8787)। ফোন থেকে দেখতে
+> `./run-mac.sh --phone` চালান, তারপর sidebar-এর নিচের 📱 বোতাম থেকে লিংক কপি করে
+> ফোনে খুলুন (ফোন আর Mac একই Wi-Fi-তে থাকতে হবে)।
+
 ### Deploy to a VPS (one command)
 
 On a fresh Ubuntu/Debian server with ports 80/443 open:

@@ -242,6 +242,17 @@
   .diff .h { color: var(--muted); }
   .muted { color: var(--muted); }
   .scrim { display: none; }
+  .modal-back { position: fixed; inset: 0; background: rgba(0, 0, 0, .4); z-index: 35; display: none; align-items: center; justify-content: center; padding: 16px; }
+  .modal-back.open { display: flex; }
+  .modal { background: var(--panel); border-radius: 22px; box-shadow: var(--shadow); width: min(440px, 100%); padding: 22px; position: relative; }
+  .modal h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 0 0 6px; }
+  .modal p { color: var(--muted); margin: 0 0 14px; font-size: 14.5px; }
+  .modal .x { position: absolute; top: 12px; right: 12px; }
+  .modal .url { display: flex; align-items: center; gap: 8px; background: var(--soft); border-radius: 14px; padding: 10px 10px 10px 16px; margin-bottom: 10px; }
+  .modal .url code { flex: 1; min-width: 0; font-family: var(--mono); font-size: 15px; overflow-wrap: anywhere; }
+  .modal .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .modal .row button { border-radius: 999px; font-size: 14px; padding: 8px 16px; }
+  .modal .codecard { margin: 6px 0 12px; }
   .toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 14px; z-index: 40; opacity: 0; transition: opacity .2s; pointer-events: none; }
   .toast.show { opacity: 1; }
 
@@ -294,6 +305,7 @@
   <symbol id="play" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M7 4.5v15l12.5-7.5z"/></symbol>
   <symbol id="mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6"/></g></symbol>
   <symbol id="chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></g></symbol>
   <symbol id="file" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></g></symbol>
 </svg>
 
@@ -312,6 +324,7 @@
     <div class="profile">
       <div class="avatar">N</div>
       <div class="who"><b>NOVA workspace</b><small id="cfg">cloud coding agent</small></div>
+      <button class="icon-btn theme" id="phoneBtn" title="Open on your phone" aria-label="Open on your phone"><svg><use href="#phone"/></svg></button>
       <button class="icon-btn theme" id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme"><svg><use href="#theme"/></svg></button>
     </div>
   </aside>
@@ -319,6 +332,7 @@
   <main id="main"></main>
 </div>
 <div class="toast" id="toast"></div>
+<div class="modal-back" id="phoneModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="phoneTitle"></div></div>
 
 <script>
 const $ = (sel, el = document) => el.querySelector(sel);
@@ -356,7 +370,10 @@ document.addEventListener("click", (e) => {
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelectorAll(".codecard.expanded").forEach((c) => c.querySelector("[data-expand]").click()); });
 
-let token = store.get("nova-token") || "";
+// A phone link can carry the access token as ?t=...; keep it and clean the URL.
+const linkToken = new URLSearchParams(location.search).get("t");
+if (linkToken) { store.set("nova-token", linkToken); history.replaceState(null, "", location.pathname + location.hash); }
+let token = linkToken || store.get("nova-token") || "";
 let current = null, source = null, config = { model: "", sandbox: "" }, allTasks = [];
 
 async function api(path, opts = {}) {
@@ -811,6 +828,35 @@ async function showTask(id) {
   };
   renderList(); refreshList();
 }
+
+// "Open on your phone": shows the Wi-Fi address when the server allows it.
+function showPhone() {
+  app.classList.remove("side-open");
+  const back = $("#phoneModal"), modal = back.firstElementChild; modal.replaceChildren();
+  const close = iconBtn("close", "Close", "icon-btn x"); close.onclick = () => back.classList.remove("open");
+  modal.append(close, h("h2", null, "Open on your phone"));
+  modal.lastChild.id = "phoneTitle";
+  if (config.lan_url) {
+    modal.append(h("p", null, "Connect your phone to the same Wi-Fi as this computer, then open:"));
+    const url = h("div", "url"); const copyUrl = iconBtn("copy", "Copy address");
+    url.append(h("code", null, config.lan_url), copyUrl); copyUrl.onclick = () => copyText(config.lan_url, copyUrl);
+    const row = h("div", "row");
+    if (token) {
+      const withToken = h("button", "accent", "Copy link with access token");
+      withToken.onclick = () => copyText(`${config.lan_url}/?t=${encodeURIComponent(token)}${location.hash}`);
+      row.append(withToken);
+    }
+    modal.append(url, row);
+    if (token) modal.append(h("p", null, "The link signs your phone in automatically. Share it only with your own devices."));
+  } else {
+    modal.append(h("p", null, "Phone access is off: NOVA only listens on this computer. Stop it (Ctrl+C in the terminal) and start it again with:"));
+    modal.append(codeCard("Bash", "./run-mac.sh --phone", { shell: true }));
+    modal.append(h("p", null, "It prints an address like http://192.168.1.20:8787 and protects it with an access token."));
+  }
+  back.classList.add("open");
+}
+$("#phoneBtn").onclick = showPhone;
+$("#phoneModal").addEventListener("click", (e) => { if (e.target.id === "phoneModal") e.currentTarget.classList.remove("open"); });
 
 function route() { app.classList.remove("side-open"); const id = location.hash.slice(1); id ? showTask(id) : showNew(); }
 window.addEventListener("hashchange", route);

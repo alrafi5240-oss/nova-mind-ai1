@@ -27,6 +27,7 @@ returns a reviewable diff. It is separate from the NOVA MIND chat product in
 pip install -r requirements-dev.txt
 pytest                                   # no API key or Docker needed
 NOVA_SANDBOX=local python -m nova_agent  # run without Docker (no isolation)
+./run-mac.sh [--phone] [--port=N]        # user-facing local launcher (venv, .env, opens browser)
 ```
 
 ## Conventions
